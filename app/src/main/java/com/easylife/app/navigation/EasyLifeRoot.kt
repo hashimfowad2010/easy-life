@@ -60,6 +60,8 @@ import com.easylife.app.feature.settings.PrivacyScreen
 import com.easylife.app.feature.settings.SettingsScreen
 import com.easylife.app.feature.settings.SmartAiScreen
 import com.easylife.app.feature.today.TodayScreen
+import com.easylife.app.feature.urdu.DocumentScreen
+import com.easylife.app.feature.urdu.UrduScreen
 import kotlinx.coroutines.launch
 
 /** App-wide snackbar, so any screen can show "Saved" / "Undo". */
@@ -70,7 +72,7 @@ fun Module.route(): Any = when (this) {
     Module.LIMITS -> LimitsRoute
     Module.BILLS -> BillsRoute
     Module.BUDGET -> ComingSoonRoute(name)
-    Module.URDU -> ComingSoonRoute(name)
+    Module.URDU -> UrduRoute()
     Module.SHOPPING -> ComingSoonRoute(name)
 }
 
@@ -94,7 +96,7 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
         viewModel.consumeDeepLink()
         when (link) {
             is DeepLink.Route -> nav.openPath(link.path)
-            is DeepLink.SharedText -> scope.launch { nav.navigate(ScanConfirmRoute(scanVm.fromSharedText(link.text))) }
+            is DeepLink.SharedText -> scope.launch { nav.navigate(UrduRoute(tab = 1, draftId = scanVm.fromSharedText(link.text))) }
             is DeepLink.SharedImages -> scope.launch { nav.navigate(ScanConfirmRoute(scanVm.fromImages(link.uris))) }
         }
     }
@@ -158,6 +160,12 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
                     val r = entry.toRoute<BillConfirmRoute>()
                     BillConfirmScreen(draftId = r.draftId, kind = r.kind, nav = nav)
                 }
+
+                composable<UrduRoute> { entry ->
+                    val r = entry.toRoute<UrduRoute>()
+                    UrduScreen(tab = r.tab, draftId = r.draftId, nav = nav)
+                }
+                composable<DocumentRoute> { entry -> DocumentScreen(id = entry.toRoute<DocumentRoute>().id, onBack = { nav.popBackStack() }) }
 
                 composable<ComingSoonRoute> { entry -> ComingSoonScreen(module = entry.toRoute<ComingSoonRoute>().module, onBack = { nav.popBackStack() }) }
             }

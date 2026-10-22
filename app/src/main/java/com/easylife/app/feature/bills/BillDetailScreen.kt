@@ -75,7 +75,14 @@ import java.time.YearMonth
 import javax.inject.Inject
 
 @HiltViewModel
-class BillDetailViewModel @Inject constructor(private val repo: BillsRepository, private val meterDao: MeterDao) : ViewModel() {
+class BillDetailViewModel @Inject constructor(
+    private val repo: BillsRepository,
+    private val meterDao: MeterDao,
+    private val drafts: com.easylife.app.core.scan.ScanDraftStore,
+) : ViewModel() {
+    /** The bill text as a draft for Urdu Helper ("Show in Urdu"). */
+    suspend fun urduDraft(text: String): String = drafts.createFromText(text, null).id
+
     private val id = MutableStateFlow<Long?>(null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -111,6 +118,7 @@ fun BillDetailScreen(id: Long, nav: NavHostController, vm: BillDetailViewModel =
     val s by vm.state.collectAsStateWithLifecycle()
     val lang = currentLanguage()
     var confirmDelete by remember { mutableStateOf(false) }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     val bill = s?.first
     Scaffold(
         topBar = {
@@ -162,7 +170,12 @@ fun BillDetailScreen(id: Long, nav: NavHostController, vm: BillDetailViewModel =
                 onClick = { vm.togglePaid(bill) },
             )
             if (bill.billType == "electricity") BigOutlinedButton(SBills.openLimits.t(), icon = Icons.Rounded.Bolt, onClick = { nav.navigate(LimitsRoute) })
-            if (!bill.ocrText.isNullOrBlank()) BigOutlinedButton(SCommon.showInUrdu.t(), icon = Icons.Rounded.Translate, onClick = { nav.navigate(Module.URDU.route()) })
+            val ocr = bill.ocrText
+            if (!ocr.isNullOrBlank()) {
+                BigOutlinedButton(SCommon.showInUrdu.t(), icon = Icons.Rounded.Translate, onClick = {
+                    scope.launch { nav.navigate(com.easylife.app.navigation.UrduRoute(tab = 1, draftId = vm.urduDraft(ocr))) }
+                })
+            }
         }
     }
     if (confirmDelete && bill != null) {

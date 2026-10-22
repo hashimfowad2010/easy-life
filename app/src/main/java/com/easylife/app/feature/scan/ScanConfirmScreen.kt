@@ -218,7 +218,7 @@ fun ScanConfirmScreen(draftId: String, nav: NavHostController, vm: ScanConfirmVi
                     kind.isBill -> nav.navigate(BillConfirmRoute(draftId = draft.id, kind = kind.key))
                     kind == ScanKind.METER -> nav.navigate(AddReadingRoute(meterId = 0, draftId = draft.id))
                     kind == ScanKind.RECEIPT || kind == ScanKind.PRICE_TAG -> nav.navigate(Module.BUDGET.route())
-                    else -> nav.navigate(Module.URDU.route())
+                    else -> nav.navigate(com.easylife.app.navigation.UrduRoute(tab = 1, draftId = draft.id))
                 }
             })
             BigOutlinedButton(SScan.typeInstead.t(), icon = Icons.Rounded.Edit, onClick = {
