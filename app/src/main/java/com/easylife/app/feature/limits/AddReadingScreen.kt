@@ -174,7 +174,8 @@ fun AddReadingScreen(meterId: Long, draftId: String?, nav: NavHostController, vm
             var text by remember(r) { mutableStateOf(r?.reading?.toLong()?.toString() ?: "") }
             var date by remember { mutableStateOf(LocalDate.now()) }
             val value = text.toDoubleOrNull()
-            val lower = value != null && s.previous != null && value < s.previous
+            val previous = s.previous
+            val lower = value != null && previous != null && value < previous
             val unsure = r != null && (r.confidence < 0.8 || r.reading == null)
 
             s.provenance?.let { SourceChip(it) }
@@ -187,9 +188,9 @@ fun AddReadingScreen(meterId: Long, draftId: String?, nav: NavHostController, vm
                 uncertain = unsure || lower,
                 supporting = r?.digitsSeen?.takeIf { it.isNotBlank() }?.let { SLimits.digitsSeen.t(Fmt.ltr(it, lang)) },
             )
-            if (lower) InfoBanner(SLimits.lowerThanLast.t(Fmt.ltr(Fmt.number(s.previous!!), lang)), BannerKind.WARNING)
-            if (value != null && s.previous != null && value >= s.previous) {
-                Text(SLimits.since.t(Fmt.ltr(Fmt.smart(value - s.previous), lang)), style = MaterialTheme.typography.bodyMedium)
+            if (lower && previous != null) InfoBanner(SLimits.lowerThanLast.t(Fmt.ltr(Fmt.number(previous), lang)), BannerKind.WARNING)
+            if (value != null && previous != null && value >= previous) {
+                Text(SLimits.since.t(Fmt.ltr(Fmt.smart(value - previous), lang)), style = MaterialTheme.typography.bodyMedium)
             }
             r?.candidates?.takeIf { it.isNotEmpty() }?.let { others ->
                 Text(SLimits.otherCandidates.t(), style = MaterialTheme.typography.labelLarge)

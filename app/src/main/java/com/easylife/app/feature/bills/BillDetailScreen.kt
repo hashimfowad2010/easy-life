@@ -79,10 +79,18 @@ class BillDetailViewModel @Inject constructor(private val repo: BillsRepository,
     private val id = MutableStateFlow<Long?>(null)
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val state: StateFlow<Pair<BillEntity?, List<UsageMonthEntity>>?> = id.flatMapLatest { billId ->
-        if (billId == null) flowOf(null) else repo.observe(billId).flatMapLatest { bill ->
-            val meterId = bill?.meterId
-            if (meterId == null) flowOf(bill to emptyList()) else combine(flowOf(bill), meterDao.observeUsage(meterId)) { b, u -> b to u }
+    val state: StateFlow<Pair<BillEntity?, List<UsageMonthEntity>>?> = id.flatMapLatest<Long?, Pair<BillEntity?, List<UsageMonthEntity>>?> { billId ->
+        if (billId == null) {
+            flowOf(null)
+        } else {
+            repo.observe(billId).flatMapLatest { bill ->
+                val meterId = bill?.meterId
+                if (meterId == null) {
+                    flowOf(bill to emptyList<UsageMonthEntity>())
+                } else {
+                    combine(flowOf(bill), meterDao.observeUsage(meterId)) { b, u -> b to u }
+                }
+            }
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 

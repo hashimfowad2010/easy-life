@@ -1,0 +1,102 @@
+rules_version = '2';
+
+// Easy Life Firestore rules.
+// - Only signed-in (anonymous) users.
+// - Financial data is NEVER stored here (it stays on the phone).
+// - Every collection is create-only with strict field/type validation; no updates or deletes from clients.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function str(v, maxLen) {
+      return v is string && v.size() > 0 && v.size() <= maxLen;
+    }
+
+    function optStr(data, key, maxLen) {
+      return !(key in data) || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    // Community stores: name, area, city and ROUNDED coordinates only (never an exact location).
+    match /stores/{storeId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name', 'area', 'city', 'latRound', 'lngRound', 'createdAt'])
+        && str(request.resource.data.name, 60)
+        && str(request.resource.data.city, 40)
+        && optStr(request.resource.data, 'area', 60)
+        && (!('latRound' in request.resource.data) || (request.resource.data.latRound is number
+            && request.resource.data.latRound >= 23 && request.resource.data.latRound <= 38))
+        && (!('lngRound' in request.resource.data) || (request.resource.data.lngRound is number
+            && request.resource.data.lngRound >= 60 && request.resource.data.lngRound <= 78))
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // Anonymous price reports from receipts/shelf tags (only with the user's consent in the app).
+    match /priceReports/{reportId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['storeId', 'itemKey', 'itemName', 'pricePkr', 'packSize', 'unit', 'reportedAt', 'reporterAnonId'])
+        && request.resource.data.reporterAnonId == request.auth.uid
+        && str(request.resource.data.storeId, 40)
+        && str(request.resource.data.itemKey, 40)
+        && str(request.resource.data.itemName, 60)
+        && request.resource.data.pricePkr is number
+        && request.resource.data.pricePkr > 0 && request.resource.data.pricePkr < 100000
+        && request.resource.data.packSize is number
+        && request.resource.data.packSize > 0 && request.resource.data.packSize < 1000
+        && request.resource.data.unit in ['kg', 'g', 'l', 'ml', 'dozen', 'piece', 'packet']
+        && request.resource.data.reportedAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // Opt-in anonymous impact events: counts and rounded values only. Nobody can read them from the app.
+    match /impactEvents/{eventId} {
+      allow read: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['anonId', 'pilotCode', 'event', 'module', 'value', 'detail', 'createdAt'])
+        && request.resource.data.anonId == request.auth.uid
+        && request.resource.data.pilotCode is string && request.resource.data.pilotCode.size() <= 20
+        && str(request.resource.data.event, 60)
+        && str(request.resource.data.module, 20)
+        && (request.resource.data.value == null || request.resource.data.value is number)
+        && request.resource.data.detail is string && request.resource.data.detail.size() <= 80
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt <= request.time;
+      allow update, delete: if false;
+    }
+
+    // In-app feedback (3 questions). Create-only.
+    match /feedback/{feedbackId} {
+      allow read: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['anonId', 'pilotCode', 'q1', 'q2', 'q3', 'comment', 'lang', 'createdAt'])
+        && request.resource.data.anonId == request.auth.uid
+        && request.resource.data.pilotCode is string && request.resource.data.pilotCode.size() <= 20
+        && request.resource.data.q1 is int && request.resource.data.q1 >= 1 && request.resource.data.q1 <= 5
+        && request.resource.data.q2 is list && request.resource.data.q2.size() <= 8
+        && request.resource.data.q3 is bool
+        && request.resource.data.comment is string && request.resource.data.comment.size() <= 500
+        && request.resource.data.lang in ['en', 'ur']
+        && request.resource.data.createdAt == request.time;
+      allow update, delete: if false;
+    }
+
+    // Written only by Cloud Functions (after funding). Clients may read cached prices.
+    match /priceCache/{key} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /rateLimits/{uid} {
+      allow read, write: if false;
+    }
+
+    // Everything else is closed.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
