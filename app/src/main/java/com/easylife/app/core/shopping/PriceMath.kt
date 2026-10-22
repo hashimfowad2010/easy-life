@@ -99,6 +99,20 @@ object BasketOptimizer {
             StorePrice(key.first, key.second, RobustStats.median(clean), dim, clean.size, pts.maxOf { it.reportedAt })
         }
 
+    /**
+     * What the list needs at a pack price: "Rs 860 for 450 g" and a need of 900 g costs Rs 1,720. When the units
+     * can't be compared, each packet on the list counts as one priced pack (3 packets of milk at Rs 240 = Rs 720).
+     */
+    fun lineCost(needQty: Double, needUnit: String?, packPrice: Double, packSize: Double, packUnit: String?): Double {
+        val need = Quantity.of(needQty, needUnit)
+        val pack = Quantity.of(packSize, packUnit)
+        return when {
+            need.dimension == pack.dimension && pack.amount > 0 -> packPrice * need.amount / pack.amount
+            need.dimension == Dimension.PACK -> packPrice * need.amount
+            else -> packPrice
+        }
+    }
+
     /** Cost of the needed quantity at a store, or null if units can't be compared. */
     fun cost(need: ListNeed, price: StorePrice): Double? = when {
         need.quantity.dimension == price.dimension -> need.quantity.amount * price.unitPrice

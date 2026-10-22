@@ -2,9 +2,17 @@ package com.easylife.app.feature.shopping
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.easylife.app.core.ai.AiError
+import com.easylife.app.core.ai.providers.CloudAiException
+import com.easylife.app.core.ai.providers.ClaudeProvider
 import com.easylife.app.core.budget.BudgetInsights
+import com.easylife.app.core.cloud.FirebaseGateway
+import com.easylife.app.core.cloud.OnlinePrice
+import com.easylife.app.core.cloud.OnlinePrices
 import com.easylife.app.core.cloud.Retailer
 import com.easylife.app.core.cloud.RemoteConfigRepository
+import com.easylife.app.core.cloud.ShopSearchClient
+import com.easylife.app.core.data.prefs.PrefsRepository
 import com.easylife.app.core.data.db.CategoryEntity
 import com.easylife.app.core.data.db.PriceReportEntity
 import com.easylife.app.core.data.db.ShoppingItemEntity
@@ -29,6 +37,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.io.IOException
 import java.time.LocalDateTime
 import java.time.YearMonth
 import javax.inject.Inject
@@ -45,12 +54,33 @@ data class ListDetail(
     val groceriesLeft: Double?,
 )
 
+sealed interface OnlineSearchState {
+    data object Idle : OnlineSearchState
+    data object Loading : OnlineSearchState
+    data class Done(val prices: OnlinePrices) : OnlineSearchState
+    data class Failed(val error: AiError) : OnlineSearchState
+}
+
 @HiltViewModel
 class ShoppingViewModel @Inject constructor(
     private val repo: ShoppingRepository,
     budget: BudgetRepository,
     config: RemoteConfigRepository,
+    private val prefs: PrefsRepository,
+    private val onlineClient: ShopSearchClient,
+    firebase: FirebaseGateway,
 ) : ViewModel() {
+
+    /**
+     * Smart AI online prices: only when Claude is switched on in Remote Config, the user turned Smart AI on and
+     * agreed to Claude, and Firebase is connected. Otherwise the retailer search buttons are the way.
+     */
+    val onlineAvailable: StateFlow<Boolean> = combine(config.config, prefs.prefs) { c, p ->
+        c.claudeEnabled && p.smartAiEnabled && p.claudeConsentAt != null && firebase.isConfigured
+    }.stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    private val _online = MutableStateFlow<OnlineSearchState>(OnlineSearchState.Idle)
+    val online = _online.asStateFlow()
 
     val lists: StateFlow<List<ShoppingListEntity>?> = repo.lists.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
     val retailers: StateFlow<List<Retailer>> = config.config.map { c -> c.retailers.retailers.filter { it.grocery } }
@@ -119,6 +149,29 @@ class ShoppingViewModel @Inject constructor(
         val ok = repo.syncCommunity(keys)
         _syncing.value = false
         onDone(ok)
+    }
+
+    fun searchOnline() = viewModelScope.launch {
+        val items = detail.value?.items.orEmpty().filter { !it.checked && it.itemKey != null }.take(8)
+        if (items.isEmpty() || _online.value == OnlineSearchState.Loading) return@launch
+        _online.value = OnlineSearchState.Loading
+        _online.value = try {
+            OnlineSearchState.Done(onlineClient.search(items.map { it.itemKey!! to it.nameEn }, prefs.current().city))
+        } catch (e: CloudAiException) {
+            OnlineSearchState.Failed(ClaudeProvider.mapCode(e.code))
+        } catch (e: IOException) {
+            OnlineSearchState.Failed(AiError.Network)
+        }
+    }
+
+    fun closeOnline() {
+        _online.value = OnlineSearchState.Idle
+    }
+
+    /** The user confirms an AI-found price before it is used (spec rule 6). */
+    fun useOnlinePrice(p: OnlinePrice) = viewModelScope.launch {
+        val item = detail.value?.items?.firstOrNull { it.itemKey == p.item } ?: return@launch
+        repo.setManualPrice(item, p.pricePkr, p.retailer, p.packSize ?: 1.0, p.unit ?: "packet")
     }
 
     fun logComparison() {

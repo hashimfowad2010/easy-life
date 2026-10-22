@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -24,11 +25,13 @@ import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.OpenInBrowser
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.TravelExplore
 import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material.icons.rounded.Sync
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
@@ -44,6 +47,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,9 +61,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import com.easylife.app.core.ai.AiError
+import com.easylife.app.core.ai.Provenance
+import com.easylife.app.core.cloud.OnlinePrice
 import com.easylife.app.core.data.db.ShoppingItemEntity
 import com.easylife.app.core.designsystem.BannerKind
 import com.easylife.app.core.designsystem.BigButton
+import com.easylife.app.core.designsystem.BigOutlinedButton
 import com.easylife.app.core.designsystem.ConfirmField
 import com.easylife.app.core.designsystem.DemoChip
 import com.easylife.app.core.designsystem.EasyCard
@@ -72,6 +80,7 @@ import com.easylife.app.core.designsystem.LoadingBox
 import com.easylife.app.core.designsystem.Pill
 import com.easylife.app.core.designsystem.SectionHeader
 import com.easylife.app.core.designsystem.SmartAiChip
+import com.easylife.app.core.designsystem.SourceChip
 import com.easylife.app.core.i18n.AppLanguage
 import com.easylife.app.core.i18n.Fmt
 import com.easylife.app.core.i18n.SCommon
@@ -173,6 +182,8 @@ fun ShoppingListScreen(id: Long, nav: NavHostController, vm: ShoppingViewModel =
     LaunchedEffect(id) { vm.open(id) }
     val d by vm.detail.collectAsStateWithLifecycle()
     val retailers by vm.retailers.collectAsStateWithLifecycle()
+    val onlineAvailable by vm.onlineAvailable.collectAsStateWithLifecycle()
+    val online by vm.online.collectAsStateWithLifecycle()
     val lang = currentLanguage()
     val context = LocalContext.current
     var input by remember { mutableStateOf("") }
@@ -207,6 +218,9 @@ fun ShoppingListScreen(id: Long, nav: NavHostController, vm: ShoppingViewModel =
                         }
                     }
                     BigButton(SShop.compare.t(), icon = Icons.Rounded.CompareArrows, onClick = { nav.navigate(CompareRoute(id)) }, modifier = Modifier.padding(top = 8.dp))
+                    if (onlineAvailable) {
+                        BigOutlinedButton(SShop.onlineCheck.t(), icon = Icons.Rounded.TravelExplore, onClick = { vm.searchOnline() }, modifier = Modifier.padding(top = 8.dp))
+                    }
                 }
             }
             items(detail.items, key = { it.id }) { item ->
@@ -253,12 +267,19 @@ fun ShoppingListScreen(id: Long, nav: NavHostController, vm: ShoppingViewModel =
                         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r.searchUrlFor(query))).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                     }, modifier = Modifier.fillMaxWidth()) { Text(SShop.searchOn.t(r.name)) }
                 }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    SmartAiChip()
-                    Spacer(Modifier.width(8.dp))
-                    Text(SShop.autoSearch.t() + " — " + SProvenance.comingWithSmartAi.t(), style = MaterialTheme.typography.bodySmall)
+                if (!onlineAvailable) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        SmartAiChip()
+                        Spacer(Modifier.width(8.dp))
+                        Text(SShop.autoSearch.t() + " — " + SProvenance.comingWithSmartAi.t(), style = MaterialTheme.typography.bodySmall)
+                    }
                 }
             }
+        }
+    }
+    if (online != OnlineSearchState.Idle) {
+        ModalBottomSheet(onDismissRequest = vm::closeOnline) {
+            OnlineResults(online, d?.items.orEmpty(), onUse = vm::useOnlinePrice)
         }
     }
     pricing?.let { item -> FoundPriceDialog(item, retailers.map { it.name }, onDismiss = { pricing = null }) { price, retailer, pack, unit ->
@@ -273,6 +294,72 @@ fun ShoppingListScreen(id: Long, nav: NavHostController, vm: ShoppingViewModel =
             confirmButton = { TextButton(onClick = { share(context, vm.shareText(items, AppLanguage.UR)); sharing = false }) { Text(SShop.shareUrdu.t()) } },
             dismissButton = { TextButton(onClick = { share(context, vm.shareText(items, AppLanguage.EN)); sharing = false }) { Text(SShop.shareEnglish.t()) } },
         )
+    }
+}
+
+/** Prices found by `shopSearch`: labelled Smart AI (Claude), dated, linked, and only used after the user taps "Use". */
+@Composable
+private fun OnlineResults(state: OnlineSearchState, items: List<ShoppingItemEntity>, onUse: (OnlinePrice) -> Unit) {
+    val lang = currentLanguage()
+    val context = LocalContext.current
+    val snackbar = LocalSnackbar.current
+    val usedText = SShop.onlineUsed.t()
+    val used = remember { mutableStateListOf<OnlinePrice>() }
+    Column(Modifier.padding(16.dp).padding(bottom = 24.dp).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(SShop.onlineTitle.t(), style = MaterialTheme.typography.titleLarge)
+        when (state) {
+            OnlineSearchState.Idle -> Unit
+            OnlineSearchState.Loading -> Row(verticalAlignment = Alignment.CenterVertically) {
+                CircularProgressIndicator(Modifier.size(24.dp))
+                Spacer(Modifier.width(12.dp))
+                Text(SShop.onlineChecking.t(), style = MaterialTheme.typography.bodyMedium)
+            }
+            is OnlineSearchState.Failed -> InfoBanner(
+                when (state.error) {
+                    AiError.RateLimited -> SShop.onlineBusy.t()
+                    AiError.Network, AiError.Timeout -> SShop.onlineOffline.t()
+                    else -> SShop.onlineFailed.t()
+                },
+                BannerKind.WARNING,
+            )
+            is OnlineSearchState.Done -> {
+                val p = state.prices
+                SourceChip(Provenance.CLAUDE)
+                val date = runCatching { Fmt.date(java.time.LocalDate.parse(p.checkedAt.take(10)), lang) }.getOrDefault(p.checkedAt.take(10))
+                Text(SShop.onlineNote.t(date), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (p.results.isEmpty()) InfoBanner(SShop.onlineNone.t())
+                p.results.groupBy { it.item }.forEach { (key, results) ->
+                    val item = items.firstOrNull { it.itemKey == key }
+                    Text(item?.let { if (lang == AppLanguage.UR) it.nameUr else it.nameEn } ?: key, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(top = 8.dp))
+                    results.forEach { r ->
+                        EasyCard {
+                            Text(r.retailer, style = MaterialTheme.typography.labelLarge, color = EasyTheme.colors.shopping.accent)
+                            Text(r.productTitle, style = MaterialTheme.typography.bodyMedium)
+                            val pack = r.packSize?.let { "${Fmt.smart(it)} ${r.unit ?: ""}".trim() }
+                            val perUnit = r.unitPrice?.let { up ->
+                                val per = when (r.unit) { "g", "kg" -> "kg"; "ml", "l" -> "l"; "dozen", "piece" -> "piece"; else -> r.unit ?: "packet" }
+                                SShop.perUnit.t(Fmt.rupees(up, lang), per)
+                            }
+                            Text(listOfNotNull(Fmt.rupees(r.pricePkr, lang), pack, perUnit).joinToString(" · "), style = MaterialTheme.typography.titleSmall)
+                            Row {
+                                TextButton(onClick = {
+                                    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r.url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                                }) { Text(SShop.onlineOpen.t()) }
+                                TextButton(enabled = r !in used, onClick = {
+                                    onUse(r)
+                                    used += r
+                                    kotlinx.coroutines.MainScope().launch { snackbar.showSnackbar(usedText) }
+                                }) { Text(SShop.onlineUse.t()) }
+                            }
+                        }
+                    }
+                }
+                if (p.notFound.isNotEmpty()) {
+                    val names = p.notFound.map { k -> items.firstOrNull { it.itemKey == k }?.let { if (lang == AppLanguage.UR) it.nameUr else it.nameEn } ?: k }
+                    Text(SShop.onlineNotFound.t(names.joinToString(if (lang == AppLanguage.UR) "، " else ", ")), style = MaterialTheme.typography.bodySmall)
+                }
+            }
+        }
     }
 }
 

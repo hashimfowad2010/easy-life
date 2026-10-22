@@ -60,3 +60,40 @@ Tick each item in **both English and Urdu**, and in **light and dark** mode (Set
 ## Offline and low-end
 - [ ] Airplane mode: everything above still works (except online-only items, which say so).
 - [ ] On a low-end phone the dashboard opens in under 2 s after the first launch.
+
+## Urdu Helper
+- [ ] First translation asks to download the Urdu model (about 30 MB, Wi-Fi by default); after that it works in airplane mode.
+- [ ] Type or paste English → Translate → Urdu text in simple words; "Read aloud" speaks it (or shows the guide to install an Urdu voice).
+- [ ] Speak: microphone permission asked only now, with a reason; deny → typing still works.
+- [ ] Scan & Read: a photographed circular → text, translation, dates, amounts and "Things to do"; a date can become a reminder.
+- [ ] Share text from WhatsApp or Chrome to Easy Life → opens in Urdu Helper.
+- [ ] A prescription or legal paper shows the "check with a doctor / lawyer" banner and never a dose.
+
+## Budget
+- [ ] Bank setup asks only for the bank name and optional last 4 digits (never a password, PIN, OTP or full number).
+- [ ] SMS permission asked only when you tap "Allow reading SMS", with a reason; deny → statement import / adding by hand still work.
+- [ ] SMS Lab: an OTP message shows "DISCARD"; it never appears in Transactions.
+- [ ] Transactions: exclude one → monthly total drops; Undo restores it. "Exclude similar…" offers a rule.
+- [ ] Money sent to yourself and back is suggested as a self-transfer pair; a refund is paired with its purchase.
+- [ ] Paying a bill by bank SMS suggests marking that bill paid.
+- [ ] Budgets: set Groceries; Today shows a warning card when it runs low.
+- [ ] Biometric lock (Settings): Budget asks for fingerprint/PIN.
+
+## Smart Shopping
+- [ ] New list: "2 kg cheeni, 1 dozen anday, Dalda 5 litre, aadha kilo dahi, chips" → 5 items with quantities and units.
+- [ ] Mark an item "can skip"; the estimate shows the must-have total and the Groceries budget left.
+- [ ] Search on a retailer opens that shop's own search page in the browser; typing the price back adds it to the item.
+- [ ] Compare prices (demo data): cheapest per item with "Reported N days ago · N reports", best single shop, best split across 2 shops, savings; the silly Rs 1,600 sugar report is ignored; "not guaranteed cheapest" note shown.
+- [ ] Scan a receipt → confirm → saved as a Budget transaction and as prices; sharing prices asks for consent first.
+- [ ] Share the list in Urdu and in English (WhatsApp).
+
+## Impact and feedback
+- [ ] Settings → Help the project → ILAP impact report: highlights and bars show the demo activity; "Save as CSV" and "Save one-page PDF" write files that open.
+- [ ] The PDF is one page and readable in Urdu too.
+- [ ] Settings → Give feedback: Send stays disabled until questions 1 and 3 are answered; after sending, the Today card does not come back.
+- [ ] Three days after install a "How is Easy Life helping?" card appears on Today; "Later" hides it for 3 days.
+- [ ] With "Share anonymous counts" off, nothing is uploaded (check Firestore stays empty).
+
+## Smart AI switches
+- [ ] Settings → Smart AI: off by default; turning it on explains what is sent (masked text / photos with numbers blacked out) and that bank SMS never go to the free tier.
+- [ ] Developer tools → AI router: each provider shows why it is or isn't used (e.g. "claude_enabled = false").

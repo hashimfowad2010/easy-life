@@ -1,0 +1,61 @@
+# Progress
+
+Updated: 23 Oct 2026. Every item marked done is in `main`, builds in CI and passes its unit tests. The emulator smoke test walks the main screens in English and Urdu on every push.
+
+**Firebase status:** not connected yet (no `GOOGLE_SERVICES_JSON` secret), so CI builds with online features **off**. The app says so in Settings. Everything that needs Firebase (Remote Config updates, anonymous price sharing, impact upload, feedback upload, Crashlytics) is built and switches on automatically once the secret is added.
+
+## Phase 0: Foundation ✅
+Done:
+- Repo, `.gitignore` (secrets, keystores, `google-services.json`, `test-data/`), CI (build, unit tests, lint, APK artifact), signed release workflow (`vA.B.C` tag → GitHub Release), versionCode from the tag.
+- Signing key made once; stored as GitHub secrets; offline backup outside the repo.
+- Theme (light/dark), typed English + Urdu strings, right-to-left Urdu, Noto Nastaliq / Naskh fonts, Western digits.
+- Onboarding (language, modules, city + pilot code, impact opt-in), bottom bar, Modules grid, Today feed, Settings.
+- Room + SQLCipher (key wrapped by Android Keystore), DataStore settings, export all data / delete all data.
+- AI module: router (on-device first; Gemini and Claude behind switches; consent; masking), on-device provider, demo provider, source labels.
+- Universal Scan: document scanner, gallery, share-to-app, on-device classification (bill / meter / receipt / price tag / document).
+- Developer tools (tap version 7 times): Parser Lab, SMS Lab, error report, AI router view.
+
+## Phase 1: Bills + Bijli Guard ✅
+Done: on-device bill parser (fuzzy labels, OCR digit fixes, history table), confirm screen with highlighted uncertain fields, reminders (quiet hours), bill list and detail, "pay by … to save Rs …"; Shared Limit Engine, tariff calculator (both billing modes, 200/201 boundary, 6-month protected lookback, calibration), meter photo reading (CameraX) with candidates, dashboard, projections, reading-date slip warning, history, appliance advisor, custom limits, Today cards; Gemini provider behind `gemini_enabled` (off).
+
+## Phase 2: Urdu Helper ✅
+Done: ML Kit translation with model download (Wi-Fi by default), Scan & Read, type/paste, Speak (speech to text), read aloud with Urdu-voice guide and fallback, saved documents with dates, amounts and to-dos, reminders from documents, share target from WhatsApp/Chrome, medical/legal banner.
+
+## Phase 3: Budget ✅
+Done: bank setup (name + optional last 4 only), SMS import + live receiver, notification-access option, statement CSV import, 33 fictional SMS fixtures, OTP/security messages discarded before anything else, SMS Lab, review inbox, exclusions with undo, rules, self-transfer and refund pairing, bill auto-match, categories, budgets through the Limit Engine, biometric lock.
+
+## Phase 4: Smart Shopping ✅
+Done: Roman-Urdu/Urdu/English list parser + grocery dictionary, saved lists with "can skip" items, community prices from receipts and shelf tags (with consent), outlier filter (median ± MAD), retailer search buttons (6 verified URL patterns), typing a found price back, unit-price comparison, best single shop, best split across 2 shops, savings vs most expensive / average, budget link, share list in Urdu or English, receipt → Budget transaction + prices.
+
+## Phase 5: Polish 🟡 (in progress)
+Done:
+- Impact events (anonymous, rounded, opt-in upload) including **cycles kept under the limit after a warning** and AI source + correction rate.
+- **ILAP impact report** (Settings → Help the project): highlights, activity per module, results per AI source; **CSV** and **one-page PDF** export.
+- **Feedback** after 3 days of use (Today card, or Settings): 3 questions in Urdu/English, sent anonymously, kept and retried when offline.
+- Demo mode (fictional family: bill history crossing 200 in July, readings, transactions with an exclusion, saved shopping list, translated circular).
+- **Cloud Functions** `ai` and `shopSearch` (TypeScript, Claude Haiku 5.5 / Sonnet 5.5, structured JSON output, server-side masking, per-user and daily limits, monthly USD budget, web search limited to the retailer allowlist, shared 24 h price cache). 25 tests with a fake Anthropic client run in CI. **Not deployed.**
+- "Check prices online (Smart AI)" in Smart Shopping, shown only when Claude is switched on: results labelled Smart AI (Claude), dated, linked to the shop's page, used only after "Use this price".
+- Remote Config template generated from the app's bundled defaults (CI checks it stays in sync); manual "Deploy Firebase" workflow.
+- Emulator smoke test with screenshots in English and Urdu.
+- README with architecture diagram, privacy, limitations, "Switching on Smart AI (Claude)" and cost table, scaling plan.
+
+Not done yet:
+- Accessibility pass (TalkBack labels on every icon button, 200 % font scale check on every screen).
+- Committing the Room schema and switching to real migrations from v1.0.
+- v1.0.0 release.
+
+## Known issues
+- Parsers are tuned on fictional samples only; real bills may need Parser Lab tuning (see `test-data.README.md`).
+- On the Modules grid in Urdu the fifth tile (Smart Shopping) is below the fold on small screens; scroll down.
+- Online features are off until Firebase is connected.
+
+## What to test on your phone
+Install `EasyLife.apk` from the latest release, then follow [QA.md](QA.md). Quick path (10 minutes):
+1. Onboarding in اردو: the whole app flips right-to-left.
+2. Today → "Try with demo data": Bijli Guard card, LESCO bill, Groceries budget, reminder.
+3. Bijli Guard → read the projection; Appliances → "See saving tips".
+4. Scan button → "Try a sample (fictional)" → Sample LESCO bill → Continue → check highlighted fields → Save.
+5. Modules → Urdu Helper → type an English sentence → Translate → Read aloud.
+6. Modules → Smart Shopping → "Weekly groceries" → Compare prices.
+7. Modules → Budget → Transactions → exclude one → totals change; Undo.
+8. Settings → Help the project → ILAP impact report → Save one-page PDF.

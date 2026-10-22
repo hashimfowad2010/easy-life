@@ -15,6 +15,7 @@ import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.core.os.LocaleListCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -56,7 +57,10 @@ class SmokeTest {
 
     private fun click(text: String) {
         waitText(text)
-        compose.onAllNodesWithText(text, substring = true).onFirst().performClick()
+        val node = compose.onAllNodesWithText(text, substring = true).onFirst()
+        // Taller Urdu text pushes some buttons below the screen: scroll them into view like a user would.
+        runCatching { node.performScrollTo() }
+        node.performClick()
         compose.waitForIdle()
     }
 

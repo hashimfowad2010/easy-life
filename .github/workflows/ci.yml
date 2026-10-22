@@ -56,6 +56,7 @@ jobs:
           path: |
             app/build/reports/
             app/build/test-results/
+            app/schemas/
           retention-days: 7
 
   functions:

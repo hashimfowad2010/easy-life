@@ -18,6 +18,7 @@ import com.easylife.app.core.i18n.SShop
 import com.easylife.app.core.impact.ImpactEvents
 import com.easylife.app.core.impact.ImpactTracker
 import com.easylife.app.core.parse.ShoppingListParser
+import com.easylife.app.core.shopping.BasketOptimizer
 import com.easylife.app.core.shopping.PricePoint
 import com.google.firebase.Firebase
 import com.google.firebase.firestore.FieldValue
@@ -76,7 +77,9 @@ class ShoppingRepository @Inject constructor(
 
     /** "I found a price" from a retailer's site: kept as a manual price on the item (and a local price point). */
     suspend fun setManualPrice(item: ShoppingItemEntity, price: Double, retailer: String, packSize: Double, unit: String) {
-        dao.updateItem(item.copy(manualPrice = price, manualPriceSource = retailer, manualPriceAt = Instant.now()))
+        // The item shows what the list needs, scaled from the pack that was priced.
+        val cost = BasketOptimizer.lineCost(item.qty, item.unit, price, packSize, unit)
+        dao.updateItem(item.copy(manualPrice = cost, manualPriceSource = retailer, manualPriceAt = Instant.now()))
         val key = item.itemKey ?: return
         val storeId = "online:$retailer"
         dao.upsertStores(listOf(StoreEntity(id = storeId, name = retailer, area = "online", city = "online")))

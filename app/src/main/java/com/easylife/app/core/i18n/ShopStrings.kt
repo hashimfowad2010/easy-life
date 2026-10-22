@@ -71,4 +71,22 @@ object SShop {
     val consentYes = Txt("Yes, share anonymously", "ہاں، گمنام شیئر کریں")
     val consentNo = Txt("No, keep on my phone", "نہیں، صرف میرے فون پر")
     val pricesSaved = Txt("%1\$s prices saved", "%1\$s قیمتیں محفوظ")
+
+    // Online prices through Smart AI (Cloud Function shopSearch, after funding)
+    val onlineCheck = Txt("Check prices online (Smart AI)", "آن لائن قیمتیں دیکھیں (سمارٹ AI)")
+    val onlineTitle = Txt("Online prices", "آن لائن قیمتیں")
+    val onlineChecking = Txt("Searching the shops' own websites… this can take a minute.", "دکانوں کی اپنی ویب سائٹس پر تلاش ہو رہی ہے… ایک منٹ لگ سکتا ہے۔")
+    val onlineNote = Txt(
+        "Found by Smart AI on each shop's own website (%1\$s). Prices change: open the page before you buy. Not guaranteed cheapest.",
+        "سمارٹ AI نے ہر دکان کی اپنی ویب سائٹ پر پایا (%1\$s)۔ قیمتیں بدلتی ہیں: خریدنے سے پہلے صفحہ کھول کر دیکھیں۔ سب سے سستی ہونے کی ضمانت نہیں۔",
+    )
+    val onlineUse = Txt("Use this price", "یہ قیمت لیں")
+    val onlineOpen = Txt("Open page", "صفحہ کھولیں")
+    val onlineUsed = Txt("Price added to your list", "قیمت فہرست میں شامل ہو گئی")
+    val onlineNotFound = Txt("Not found online: %1\$s", "آن لائن نہیں ملا: %1\$s")
+    val onlineNone = Txt("No prices found on the allowed shop websites.", "اجازت شدہ دکانوں کی ویب سائٹس پر کوئی قیمت نہیں ملی۔")
+    val onlineBusy = Txt("Smart AI is busy or today's limit is reached. Try again later.", "سمارٹ AI مصروف ہے یا آج کی حد پوری ہو گئی۔ بعد میں کوشش کریں۔")
+    val onlineOffline = Txt("No internet. Try again when you are online.", "انٹرنیٹ نہیں ہے۔ آن لائن ہو کر دوبارہ کوشش کریں۔")
+    val onlineFailed = Txt("Online search did not work this time.", "اس بار آن لائن تلاش نہیں ہو سکی۔")
+    val perUnit = Txt("%1\$s per %2\$s", "فی %2\$s %1\$s")
 }

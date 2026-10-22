@@ -71,4 +71,14 @@ class PriceMathTest {
         val c = BasketOptimizer.compare(listOf(ListNeed("milk", Quantity.of(2.0, "packet"))), listOf(p("a", "milk", 240.0, 1.0, "l")))
         assertEquals(listOf("milk"), c.itemsWithoutPrices)
     }
+
+    @Test
+    fun lineCostScalesThePricedPackToTheNeed() {
+        assertEquals(1720.0, BasketOptimizer.lineCost(900.0, "g", 860.0, 450.0, "g"), 0.001)
+        assertEquals(1180.0, BasketOptimizer.lineCost(2.0, "l", 2950.0, 5.0, "l"), 0.001)
+        assertEquals(390.0, BasketOptimizer.lineCost(1.0, "dozen", 32.5, 1.0, "piece"), 0.001)
+        // Packets vs litres: each packet counts as one priced pack.
+        assertEquals(720.0, BasketOptimizer.lineCost(3.0, "packet", 240.0, 1.0, "l"), 0.001)
+        assertEquals(240.0, BasketOptimizer.lineCost(2.0, "kg", 240.0, 1.0, "packet"), 0.001)
+    }
 }
