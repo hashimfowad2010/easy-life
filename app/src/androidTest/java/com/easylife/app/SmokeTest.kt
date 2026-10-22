@@ -9,6 +9,7 @@ import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isRoot
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.printToString
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onAllNodesWithContentDescription
 import androidx.compose.ui.test.onAllNodesWithText
@@ -36,7 +37,9 @@ class SmokeTest {
 
     private val instrumentation = InstrumentationRegistry.getInstrumentation()
     private val shotsDir: File by lazy {
-        File(instrumentation.targetContext.getExternalFilesDir(null), "screenshots").apply { mkdirs() }
+        // AGP pulls this folder to build/outputs/connected_android_test_additional_output after the run.
+        (InstrumentationRegistry.getArguments().getString("additionalTestOutputDir")?.let(::File)
+            ?: File(instrumentation.targetContext.getExternalFilesDir(null), "screenshots")).apply { mkdirs() }
     }
 
     private fun setLocale(tag: String) = instrumentation.runOnMainSync {
@@ -76,6 +79,19 @@ class SmokeTest {
 
     @Test
     fun firstRunDemoAndMainScreensInBothLanguages() {
+        try {
+            runFlow()
+        } catch (e: Throwable) {
+            // Leave evidence for CI: what was on screen and the UI tree.
+            shot("zz-failure")
+            runCatching {
+                File(shotsDir, "zz-failure-tree.txt").writeText(compose.onAllNodes(isRoot()).onFirst().printToString(maxDepth = 40))
+            }
+            throw e
+        }
+    }
+
+    private fun runFlow() {
         setLocale("en")
         scenario = ActivityScenario.launch(MainActivity::class.java)
 

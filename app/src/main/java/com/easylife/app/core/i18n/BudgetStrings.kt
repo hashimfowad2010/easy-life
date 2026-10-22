@@ -100,6 +100,8 @@ object SBudget {
         "For wallets that send app notifications instead of SMS. You can turn it off any time in Android settings.",
         "ان والٹس کے لیے جو SMS کی بجائے ایپ اطلاعات بھیجتے ہیں۔ اسے کبھی بھی اینڈرائیڈ سیٹنگز میں بند کر سکتے ہیں۔",
     )
+    val keepRaw = Txt("Keep bank message text (encrypted, on this phone)", "بینک پیغام کا متن رکھیں (خفیہ، اسی فون پر)")
+    val keepRawNote = Txt("Useful for checking a transaction later. Turn off to keep only the amounts.", "بعد میں لین دین جانچنے کے لیے مفید۔ بند کریں تو صرف رقم محفوظ ہوگی۔")
     val purgeRaw = Txt("Delete stored bank messages", "محفوظ بینک پیغامات حذف کریں")
     val purgeRawNote = Txt("Keeps your transactions, removes the original SMS text.", "لین دین رہیں گے، اصل SMS متن مٹ جائے گا۔")
     val purged = Txt("Bank messages deleted", "بینک پیغامات حذف ہو گئے")
@@ -107,6 +109,7 @@ object SBudget {
     val unlock = Txt("Unlock", "کھولیں")
     val unlockReason = Txt("Unlock your Budget", "اپنا بجٹ کھولیں")
     val money = Txt("Amount (Rs)", "رقم (Rs)")
+    val balance = Txt("Balance after", "بعد میں بیلنس")
     val moneyOut = Txt("Money out", "رقم نکلی")
     val moneyIn = Txt("Money in", "رقم آئی")
     val payee = Txt("Shop or person", "دکان یا شخص")

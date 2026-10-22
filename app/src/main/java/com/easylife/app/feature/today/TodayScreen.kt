@@ -113,6 +113,16 @@ fun TodayScreen(nav: NavHostController, onScan: () -> Unit, vm: TodayViewModel =
                     action = null,
                     onAction = {},
                 )
+                is TodayCard.Budget -> EasyCard(onClick = { nav.navigate(com.easylife.app.navigation.BudgetRoute) }) {
+                    val name = if (lang == AppLanguage.UR) card.category.nameUr else card.category.nameEn
+                    com.easylife.app.core.designsystem.HorizontalBar(
+                        label = name,
+                        valueText = Fmt.percent(card.status.fractionUsed, lang),
+                        fraction = card.status.fractionUsed.toFloat(),
+                        color = EasyTheme.colors.risk(card.status.risk),
+                    )
+                    Text(com.easylife.app.feature.budget.budgetLine(card.status, name, lang), style = MaterialTheme.typography.bodySmall)
+                }
                 TodayCard.SetupMeter -> Unit
             }
         }
@@ -152,6 +162,7 @@ private fun TodayCard.key(): String = when (this) {
     is TodayCard.Bill -> "bill-${bill.id}"
     is TodayCard.Reminder -> "rem-${reminder.id}"
     is TodayCard.Review -> "review"
+    is TodayCard.Budget -> "budget-${category.key}"
     TodayCard.SetupMeter -> "setup"
 }
 

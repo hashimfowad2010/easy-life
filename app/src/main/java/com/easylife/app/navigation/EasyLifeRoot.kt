@@ -40,6 +40,14 @@ import com.easylife.app.core.devtools.SmsLabScreen
 import com.easylife.app.feature.bills.BillConfirmScreen
 import com.easylife.app.feature.bills.BillDetailScreen
 import com.easylife.app.feature.bills.BillsScreen
+import com.easylife.app.feature.budget.AddTransactionScreen
+import com.easylife.app.feature.budget.BankSetupScreen
+import com.easylife.app.feature.budget.BudgetScreen
+import com.easylife.app.feature.budget.BudgetsScreen
+import com.easylife.app.feature.budget.ReviewInboxScreen
+import com.easylife.app.feature.budget.RulesScreen
+import com.easylife.app.feature.budget.TransactionDetailScreen
+import com.easylife.app.feature.budget.TransactionsScreen
 import com.easylife.app.feature.common.ComingSoonScreen
 import com.easylife.app.feature.limits.AddReadingScreen
 import com.easylife.app.feature.limits.AppliancesScreen
@@ -71,7 +79,7 @@ val LocalSnackbar = staticCompositionLocalOf { SnackbarHostState() }
 fun Module.route(): Any = when (this) {
     Module.LIMITS -> LimitsRoute
     Module.BILLS -> BillsRoute
-    Module.BUDGET -> ComingSoonRoute(name)
+    Module.BUDGET -> BudgetRoute
     Module.URDU -> UrduRoute()
     Module.SHOPPING -> ComingSoonRoute(name)
 }
@@ -166,6 +174,15 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
                     UrduScreen(tab = r.tab, draftId = r.draftId, nav = nav)
                 }
                 composable<DocumentRoute> { entry -> DocumentScreen(id = entry.toRoute<DocumentRoute>().id, onBack = { nav.popBackStack() }) }
+
+                composable<BudgetRoute> { BudgetScreen(nav = nav) }
+                composable<TransactionsRoute> { TransactionsScreen(nav = nav) }
+                composable<TransactionDetailRoute> { entry -> TransactionDetailScreen(id = entry.toRoute<TransactionDetailRoute>().id, nav = nav) }
+                composable<BankSetupRoute> { BankSetupScreen(nav = nav) }
+                composable<ReviewInboxRoute> { ReviewInboxScreen(nav = nav) }
+                composable<RulesRoute> { RulesScreen(nav = nav) }
+                composable<BudgetsRoute> { BudgetsScreen(nav = nav) }
+                composable<AddTransactionRoute> { AddTransactionScreen(nav = nav) }
 
                 composable<ComingSoonRoute> { entry -> ComingSoonScreen(module = entry.toRoute<ComingSoonRoute>().module, onBack = { nav.popBackStack() }) }
             }

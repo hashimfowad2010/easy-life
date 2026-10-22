@@ -18,6 +18,7 @@ import com.easylife.app.core.data.repo.DemoDataSeeder
 import com.easylife.app.core.data.repo.LimitsRepository
 import com.easylife.app.core.data.repo.MeterBundle
 import com.easylife.app.core.data.repo.state
+import com.easylife.app.core.data.repo.toTx
 import com.easylife.app.core.designsystem.Module
 import com.easylife.app.core.limits.Risk
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -69,7 +70,22 @@ sealed interface TodayCard {
     data object SetupMeter : TodayCard {
         override val priority = 5
     }
+
+    data class Budget(val category: com.easylife.app.core.data.db.CategoryEntity, val status: com.easylife.app.core.limits.LimitStatus) : TodayCard {
+        override val priority: Int = when (status.risk) {
+            Risk.CROSSED -> 75
+            Risk.DANGER -> 65
+            else -> 45
+        }
+    }
 }
+
+private data class TodayExtras(
+    val reviews: Int,
+    val reminders: List<ReminderEntity>,
+    val summary: Triple<List<String>, List<String>, Provenance?>,
+    val budgets: List<TodayCard.Budget>,
+)
 
 data class TodayState(
     val loading: Boolean = true,
@@ -90,6 +106,7 @@ class TodayViewModel @Inject constructor(
     documentDao: DocumentDao,
     private val router: AiRouter,
     private val demo: DemoDataSeeder,
+    budget: com.easylife.app.core.data.repo.BudgetRepository,
 ) : ViewModel() {
 
     private val summary = MutableStateFlow<Triple<List<String>, List<String>, Provenance?>>(Triple(emptyList(), emptyList(), null))
@@ -101,8 +118,23 @@ class TodayViewModel @Inject constructor(
         limits.meters,
         limits.selectedMeter,
         bills.unpaid,
-        combine(reviewDao.observeOpen(), documentDao.observeOpenReminders(), summary) { r, rem, s -> Triple(r, rem, s) },
-    ) { prefs, meters, bundle, unpaid, (reviews, reminders, sum) ->
+        combine(
+            reviewDao.observeOpen(),
+            documentDao.observeOpenReminders(),
+            summary,
+            combine(budget.month(java.time.YearMonth.now()), budget.categories) { txs, cats ->
+                val month = java.time.YearMonth.now()
+                val tx = txs.map { it.toTx() }
+                cats.filter { (it.monthlyBudget ?: 0.0) > 0 }.mapNotNull { c ->
+                    val s = com.easylife.app.core.budget.BudgetInsights.budgetStatus(c.monthlyBudget!!, c.key, month, tx, java.time.LocalDateTime.now())
+                    if (s.risk == Risk.SAFE) null else TodayCard.Budget(c, s)
+                }
+            },
+        ) { r, rem, s, b -> TodayExtras(r.size, rem, s, b) },
+    ) { prefs, meters, bundle, unpaid, extras ->
+        val reviews = extras.reviews
+        val reminders = extras.reminders
+        val sum = extras.summary
         val today = LocalDate.now()
         val cards = mutableListOf<TodayCard>()
         if (Module.LIMITS in prefs.enabledModules) {
@@ -119,8 +151,9 @@ class TodayViewModel @Inject constructor(
                 cards += TodayCard.Bill(b, b.state(today), b.dueDate?.let { ChronoUnit.DAYS.between(today, it) })
             }
         }
+        if (Module.BUDGET in prefs.enabledModules) cards += extras.budgets
         reminders.filter { !it.date.isAfter(today.plusDays(3)) }.forEach { cards += TodayCard.Reminder(it) }
-        if (reviews.isNotEmpty()) cards += TodayCard.Review(reviews.size)
+        if (reviews > 0) cards += TodayCard.Review(reviews)
         TodayState(
             loading = false,
             prefs = prefs,
