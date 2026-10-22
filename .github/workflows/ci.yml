@@ -80,3 +80,6 @@ jobs:
           npm ci
           npm run build
           npm test
+      - name: Remote Config template matches the app's bundled defaults
+        if: steps.check.outputs.present == 'true'
+        run: node firebase/scripts/build-remoteconfig.mjs --check

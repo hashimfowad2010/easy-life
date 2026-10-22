@@ -1,0 +1,87 @@
+name: Deploy Firebase (manual)
+
+# Run by hand from the Actions tab. Needs two repository secrets:
+#   FIREBASE_SERVICE_ACCOUNT  JSON key of a service account with the Firebase Admin role
+#   FIREBASE_PROJECT_ID       the Firebase project id
+# Rules and Remote Config work on the free Spark plan. Functions need the Blaze plan and the
+# ANTHROPIC_API_KEY secret (see README, "Switching on Smart AI (Claude)").
+# Careful: remote-config REPLACES values changed in the Firebase console with the app's bundled defaults.
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: What to deploy
+        type: choice
+        options:
+          - firestore-rules
+          - remote-config
+          - functions
+        default: firestore-rules
+      claude_enabled:
+        description: "Functions only: switch Claude on (CLAUDE_ENABLED)"
+        type: boolean
+        default: false
+      monthly_budget_usd:
+        description: "Functions only: stop Smart AI after this many USD per month"
+        type: string
+        default: "25"
+
+concurrency:
+  group: deploy-firebase
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      TARGET: ${{ inputs.target }}
+      CLAUDE_ENABLED: ${{ inputs.claude_enabled }}
+      MONTHLY_BUDGET_USD: ${{ inputs.monthly_budget_usd }}
+      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Service account
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ] || [ -z "$FIREBASE_PROJECT_ID" ]; then
+            echo "::error::Add the FIREBASE_SERVICE_ACCOUNT and FIREBASE_PROJECT_ID repository secrets first."
+            exit 1
+          fi
+          printf '%s' "$FIREBASE_SERVICE_ACCOUNT" > "$RUNNER_TEMP/service-account.json"
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/service-account.json" >> "$GITHUB_ENV"
+
+      - name: Remote Config template matches the app's bundled defaults
+        run: node firebase/scripts/build-remoteconfig.mjs --check
+
+      - name: Build and test functions
+        if: inputs.target == 'functions'
+        working-directory: firebase/functions
+        run: |
+          case "$MONTHLY_BUDGET_USD" in ''|*[!0-9]*) echo "::error::monthly_budget_usd must be a whole number"; exit 1;; esac
+          npm ci
+          npm run build
+          npm test
+          # Function parameters (see src/index.ts). Written only on the runner, never committed.
+          printf 'CLAUDE_ENABLED=%s\nMONTHLY_BUDGET_USD=%s\n' "$CLAUDE_ENABLED" "$MONTHLY_BUDGET_USD" > .env
+
+      - name: Deploy
+        working-directory: firebase
+        run: |
+          case "$TARGET" in
+            firestore-rules) ONLY="firestore:rules,firestore:indexes" ;;
+            remote-config)   ONLY="remoteconfig" ;;
+            functions)       ONLY="functions" ;;
+            *) echo "::error::unknown target"; exit 1 ;;
+          esac
+          npx --yes firebase-tools@15.33.0 deploy --only "$ONLY" --project "$FIREBASE_PROJECT_ID" --non-interactive --force
+
+      - name: Clean up
+        if: always()
+        run: rm -f "$RUNNER_TEMP/service-account.json" firebase/functions/.env
