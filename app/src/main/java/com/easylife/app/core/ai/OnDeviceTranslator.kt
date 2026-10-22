@@ -86,8 +86,10 @@ class MlKitTranslator @Inject constructor() : OnDeviceTranslator {
     override suspend fun translate(text: String, from: AppLanguage, to: AppLanguage): String = mutex.withLock {
         if (from == to) return text
         val translator = client(from, to)
-        text.split("\n").joinToString("\n") { line ->
-            if (line.none { it.isLetter() }) line else translator.translate(line).await()
+        val out = mutableListOf<String>()
+        for (line in text.split("\n")) {
+            out += if (line.none { it.isLetter() }) line else translator.translate(line).await()
         }
+        out.joinToString("\n")
     }
 }

@@ -51,9 +51,10 @@ object DocInsights {
 
     private val amountInText = Regex("""(?:Rs\.?|PKR|Rupees)\s?([\d,]+(?:\.\d{1,2})?)(?:\s*/-)?""", RegexOption.IGNORE_CASE)
 
+    /** Split into sentences without breaking after "Rs.", "No.", "Dr." etc. */
     fun sentences(text: String): List<String> =
         text.replace("\r", "")
-            .split(Regex("""(?<=[.!?])\s+(?=[A-Z0-9])|\n+"""))
+            .split(Regex("""(?<=[.!?])(?<!\b(?:Rs|No|Dr|Mr|Mrs|Ms|St|vs|etc|Ref)\.)\s+(?=[A-Z0-9])|\n+"""))
             .map { it.trim() }
             .filter { it.length > 2 }
 

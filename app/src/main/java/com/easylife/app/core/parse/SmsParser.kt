@@ -58,21 +58,32 @@ object SmsParser {
     )
 
     private val debitWords = Regex(
-        """\b(?:debited|debit|deducted|withdrawn|withdrawal|spent|paid|payment\s+of|purchase|purchased|sent|transferred\s+to|transfer\s+to|charged|used\s+for|bill\s+paid)\b""",
+        """\b(?:debited|debit|deducted|withdrawn|withdrawal|spent|paid|payment\s+of|purchase|purchased|sent|charged|used\s+for|bill\s+paid)\b""",
         RegexOption.IGNORE_CASE,
     )
     private val creditWords = Regex(
-        """\b(?:credited|credit(?!\s*card)|received|deposited|deposit|refund(?:ed)?|reversal|reversed|cashback|salary|transferred\s+from|added\s+to\s+your)\b""",
+        """\b(?:credited|credit(?!\s*card)|received|deposited|deposit|refund(?:ed)?|reversal|reversed|cashback|salary|added\s+to\s+your)\b""",
         RegexOption.IGNORE_CASE,
     )
+
+    /** Transfer wording without a clear in/out verb: money out unless the message says "from ... to your". */
+    private val weakDebitWords = Regex("""\b(?:transferred\s+to|transfer\s+to|funds?\s+transfer(?:red)?|transfer\s+of)\b""", RegexOption.IGNORE_CASE)
+    private val weakCreditWords = Regex("""\btransferred\s+from\b""", RegexOption.IGNORE_CASE)
     private val refundWords = Regex("""\b(?:refund(?:ed)?|reversal|reversed|chargeback)\b""", RegexOption.IGNORE_CASE)
 
-    private val namePart = """([A-Za-z][A-Za-z0-9 .&'*/-]{1,40}?)"""
-    private val stopAfterName = """(?=\s+(?:on|at|via|ref|tid|trx|from|to|for|using|with|dated|avl|avail|bal|is|has)\b|[.,;]|\s*$)"""
+    /** Amounts that are balances or limits, not the transaction itself. */
+    private val balanceLike = Regex(
+        """\b(?:bal(?:ance)?|limit|avl|avail(?:able)?)\b\W{0,3}(?:is\s*|:\s*)?(?:PKR|Rs\.?)\s?[\d,]+(?:\.\d{1,2})?""",
+        RegexOption.IGNORE_CASE,
+    )
+
+    private val namePart = """([A-Za-z0-9][A-Za-z0-9 .&'*/-]{1,40}?)"""
+    private val stopAfterName =
+        """(?=\s+(?:on|at|via|ref|tid|trx|from|to|for|in|using|with|dated|avl|avail|bal|is|has|was|your|a/c|acct|account|successfully)\b|\s*\(|[.,;!]|\s*$)"""
     private val toPattern = Regex("""\b(?:sent\s+to|transferred\s+to|transfer\s+to|paid\s+to|to)\s+$namePart$stopAfterName""", RegexOption.IGNORE_CASE)
     private val fromPattern = Regex("""\b(?:received\s+from|transferred\s+from|from)\s+$namePart$stopAfterName""", RegexOption.IGNORE_CASE)
     private val atPattern = Regex("""\b(?:at|purchase\s+at|payment\s+at|POS\s+at)\s+$namePart$stopAfterName""", RegexOption.IGNORE_CASE)
-    private val refPattern = Regex("""\b(?:ref(?:erence)?|tid|trx\s*id|txn\s*id|tran(?:saction)?\s*id|rrn|stan)[\s.:#-]*(?:no\.?)?[\s.:#-]*([A-Za-z0-9]{5,24})\b""", RegexOption.IGNORE_CASE)
+    private val refPattern = Regex("""\b(?:ref(?:erence)?|tid|trx\s*id|txn\s*id|tx\s*id|tran(?:saction)?\s*id|rrn|stan)[\s.:#-]*(?:no\.?)?[\s.:#-]*([A-Za-z0-9]{5,24})\b""", RegexOption.IGNORE_CASE)
     private val balancePattern = Regex(
         """\b(?:avl\.?|avail(?:able)?|current|new)?\s*(?:bal(?:ance)?)\.?\s*(?:is|:)?\s*(?:PKR|Rs\.?)\s?$AMOUNT""",
         RegexOption.IGNORE_CASE,
@@ -92,8 +103,8 @@ object SmsParser {
         if (isSecurityMessage(body)) return Outcome(Kind.SECURITY, SmsParseResult(isTransaction = false, kind = "security", confidence = 1.0))
 
         val amount = findAmount(body)
-        val debit = debitWords.containsMatchIn(body)
-        val credit = creditWords.containsMatchIn(body)
+        val debit = debitWords.containsMatchIn(body) || weakDebitWords.containsMatchIn(body)
+        val credit = creditWords.containsMatchIn(body) || weakCreditWords.containsMatchIn(body)
         if (amount != null && (debit || credit)) {
             val tx = transaction(sender, body, amount, debit, credit, receivedAt)
             return Outcome(Kind.TRANSACTION, tx, tx.templateId)
@@ -104,20 +115,23 @@ object SmsParser {
 
     private data class Money(val currency: String, val amount: Double, val range: IntRange)
 
+    /** The first amount in the message that is not a balance or credit limit. */
     private fun findAmount(body: String): Money? {
-        for (p in amountPatterns) {
-            val m = p.find(body) ?: continue
-            val (cur, num) = if (p == amountPatterns[2]) m.groupValues[2] to m.groupValues[1] else m.groupValues[1] to m.groupValues[2]
-            val value = num.replace(",", "").toDoubleOrNull() ?: continue
-            if (value <= 0) continue
-            val currency = when (cur.uppercase().trimEnd('.')) {
-                "PKR", "RS" -> "PKR"
-                "US$" -> "USD"
-                else -> cur.uppercase()
-            }
-            return Money(currency, value, m.range)
+        val skip = balanceLike.findAll(body).map { it.range }.toList()
+        val candidates = amountPatterns.flatMapIndexed { index, p ->
+            p.findAll(body).mapNotNull { m ->
+                if (skip.any { it.first <= m.range.first && m.range.last <= it.last }) return@mapNotNull null
+                val (cur, num) = if (index == 2) m.groupValues[2] to m.groupValues[1] else m.groupValues[1] to m.groupValues[2]
+                val value = num.replace(",", "").toDoubleOrNull()?.takeIf { it > 0 } ?: return@mapNotNull null
+                val currency = when (cur.uppercase().trimEnd('.')) {
+                    "PKR", "RS" -> "PKR"
+                    "US$" -> "USD"
+                    else -> cur.uppercase()
+                }
+                Money(currency, value, m.range)
+            }.toList()
         }
-        return null
+        return candidates.minByOrNull { it.range.first }
     }
 
     private fun transaction(
@@ -133,17 +147,23 @@ object SmsParser {
         val isRefund = refundWords.containsMatchIn(body)
         val uncertain = mutableListOf<String>()
 
-        // Direction: refunds and "received" are money in; if both kinds of words appear, the one nearest the amount wins.
+        // Direction: refunds are money in. Clear verbs ("debited", "received") beat transfer wording.
+        // If clear verbs of both kinds appear, the one nearest the amount wins and the user is asked to check.
+        val strongDebit = debitWords.containsMatchIn(body)
+        val strongCredit = creditWords.containsMatchIn(body)
         val direction = when {
             isRefund -> "credit"
-            debitWord && !creditWord -> "debit"
-            creditWord && !debitWord -> "credit"
-            else -> {
+            strongDebit && !strongCredit -> "debit"
+            strongCredit && !strongDebit -> "credit"
+            strongDebit && strongCredit -> {
                 val d = debitWords.findAll(body).minOf { kotlin.math.abs(it.range.first - money.range.first) }
                 val c = creditWords.findAll(body).minOf { kotlin.math.abs(it.range.first - money.range.first) }
                 uncertain += "direction"
                 if (d <= c) "debit" else "credit"
             }
+            weakCreditWords.containsMatchIn(body) -> "credit"
+            debitWord -> "debit"
+            else -> if (creditWord) "credit" else "debit"
         }
 
         val isWallet = walletSenders.any { senderUpper.contains(it) } || Regex("""\b(?:wallet|mobile\s+account)\b""", RegexOption.IGNORE_CASE).containsMatchIn(body)
