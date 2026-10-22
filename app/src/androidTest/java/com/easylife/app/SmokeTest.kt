@@ -174,7 +174,8 @@ class SmokeTest {
         shot("ur-02-bijli-guard")
         back()
         click("حصے")
-        waitText("سمارٹ شاپنگ")
+        // Urdu tiles are taller (Nastaliq), so Smart Shopping is below the fold: wait for a visible tile.
+        waitText("اردو مددگار")
         shot("ur-03-modules")
         click("اردو مددگار")
         waitText("اسکین اور پڑھیں")
