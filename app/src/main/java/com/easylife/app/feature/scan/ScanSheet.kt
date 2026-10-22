@@ -33,6 +33,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.easylife.app.core.designsystem.EasyTheme
 import com.easylife.app.core.designsystem.TintedIcon
 import com.easylife.app.core.i18n.SScan
@@ -46,9 +47,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ScanSheetViewModel @Inject constructor(private val drafts: ScanDraftStore) : ViewModel() {
-    suspend fun fromImages(uris: List<Uri>): String = drafts.createFromImages(uris).id
-    suspend fun fromSharedText(text: String): String = drafts.createFromText(text, com.easylife.app.core.scan.ScanDraft.SHARED).id
-    suspend fun sample(name: String): String = drafts.createSample(name).id
+    // Work runs in viewModelScope so the callback (which navigates) is always on the main thread.
+    fun fromImages(uris: List<Uri>, onReady: (String) -> Unit) = viewModelScope.launch { onReady(drafts.createFromImages(uris).id) }
+    fun fromSharedText(text: String, onReady: (String) -> Unit) = viewModelScope.launch { onReady(drafts.createFromText(text, com.easylife.app.core.scan.ScanDraft.SHARED).id) }
+    fun sample(name: String, onReady: (String) -> Unit) = viewModelScope.launch { onReady(drafts.createSample(name).id) }
+
 }
 
 /** Universal Scan: one button for bills, meters, receipts, price tags and papers. */
@@ -58,7 +61,7 @@ fun ScanSheet(viewModel: ScanSheetViewModel, onDismiss: () -> Unit, onDraft: (St
     val snackbar = LocalSnackbar.current
     val unavailable = SScan.scannerUnavailable.t()
     val launchers = rememberScanLaunchers(
-        onImages = { uris -> scope.launch { onDraft(viewModel.fromImages(uris)) } },
+        onImages = { uris -> viewModel.fromImages(uris, onDraft) },
         onScannerUnavailable = { scope.launch { snackbar.showSnackbar(unavailable) } },
     )
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
@@ -84,7 +87,7 @@ fun ScanSheet(viewModel: ScanSheetViewModel, onDismiss: () -> Unit, onDraft: (St
                     "sample_circular" to SScan.sampleCircular,
                     "sample_receipt" to SScan.sampleReceipt,
                 ).forEach { (name, label) ->
-                    AssistChip(onClick = { scope.launch { onDraft(viewModel.sample(name)) } }, label = { Text(label.t()) })
+                    AssistChip(onClick = { viewModel.sample(name, onDraft) }, label = { Text(label.t()) })
                 }
             }
         }

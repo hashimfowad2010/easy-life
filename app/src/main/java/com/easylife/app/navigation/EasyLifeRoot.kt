@@ -96,8 +96,8 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
         viewModel.consumeDeepLink()
         when (link) {
             is DeepLink.Route -> nav.openPath(link.path)
-            is DeepLink.SharedText -> scope.launch { nav.navigate(UrduRoute(tab = 1, draftId = scanVm.fromSharedText(link.text))) }
-            is DeepLink.SharedImages -> scope.launch { nav.navigate(ScanConfirmRoute(scanVm.fromImages(link.uris))) }
+            is DeepLink.SharedText -> scanVm.fromSharedText(link.text) { id -> nav.navigate(UrduRoute(tab = 1, draftId = id)) }
+            is DeepLink.SharedImages -> scanVm.fromImages(link.uris) { id -> nav.navigate(ScanConfirmRoute(id)) }
         }
     }
 

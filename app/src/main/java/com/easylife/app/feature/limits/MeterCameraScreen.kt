@@ -64,6 +64,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavHostController
 import com.easylife.app.core.designsystem.BigButton
@@ -92,6 +93,9 @@ private const val BOX_H = 0.30f
 
 @HiltViewModel
 class MeterCameraViewModel @Inject constructor(private val drafts: ScanDraftStore) : ViewModel() {
+    /** Crop + save off the main thread, then call back on the main thread (navigation). */
+    fun capture(file: File, onReady: (String) -> Unit) = viewModelScope.launch { onReady(draftFrom(file)) }
+
     suspend fun draftFrom(file: File): String {
         val cropped = withContext(Dispatchers.Default) { cropToBox(file) }
         return drafts.createFromImages(listOf(android.net.Uri.fromFile(cropped))).id.also {
@@ -149,14 +153,15 @@ fun MeterCameraScreen(meterId: Long, nav: NavHostController, vm: MeterCameraView
         onBack = { nav.popBackStack() },
         onTypeInstead = typeInstead,
         onCaptured = { file ->
-            val id = vm.draftFrom(file)
-            nav.navigate(AddReadingRoute(meterId, id)) { popUpTo<MeterCameraRoute> { inclusive = true } }
+            vm.capture(file) { id ->
+                nav.navigate(AddReadingRoute(meterId, id)) { popUpTo<MeterCameraRoute> { inclusive = true } }
+            }
         },
     )
 }
 
 @Composable
-private fun CameraContent(onBack: () -> Unit, onTypeInstead: () -> Unit, onCaptured: suspend (File) -> Unit) {
+private fun CameraContent(onBack: () -> Unit, onTypeInstead: () -> Unit, onCaptured: (File) -> Unit) {
     val context = LocalContext.current
     val owner = LocalLifecycleOwner.current
     val scope = rememberCoroutineScope()

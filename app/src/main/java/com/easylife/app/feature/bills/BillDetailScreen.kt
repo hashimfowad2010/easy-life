@@ -81,7 +81,7 @@ class BillDetailViewModel @Inject constructor(
     private val drafts: com.easylife.app.core.scan.ScanDraftStore,
 ) : ViewModel() {
     /** The bill text as a draft for Urdu Helper ("Show in Urdu"). */
-    suspend fun urduDraft(text: String): String = drafts.createFromText(text, null).id
+    fun urduDraft(text: String, onReady: (String) -> Unit) = viewModelScope.launch { onReady(drafts.createFromText(text, null).id) }
 
     private val id = MutableStateFlow<Long?>(null)
 
@@ -173,7 +173,7 @@ fun BillDetailScreen(id: Long, nav: NavHostController, vm: BillDetailViewModel =
             val ocr = bill.ocrText
             if (!ocr.isNullOrBlank()) {
                 BigOutlinedButton(SCommon.showInUrdu.t(), icon = Icons.Rounded.Translate, onClick = {
-                    scope.launch { nav.navigate(com.easylife.app.navigation.UrduRoute(tab = 1, draftId = vm.urduDraft(ocr))) }
+                    vm.urduDraft(ocr) { id -> nav.navigate(com.easylife.app.navigation.UrduRoute(tab = 1, draftId = id)) }
                 })
             }
         }
