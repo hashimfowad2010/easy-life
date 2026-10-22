@@ -1,5 +1,7 @@
 package com.easylife.app.feature.limits
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -78,11 +80,14 @@ fun MeterSummaryCard(d: MeterDashboard, isDemo: Boolean, onClick: () -> Unit) {
             ModuleIcon(Module.LIMITS, 40.dp)
             Spacer(Modifier.width(10.dp))
             Text(SLimits.title.t(), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            if (isDemo) {
-                DemoChip()
-                Spacer(Modifier.width(6.dp))
+        }
+        // Chips on their own line so a long title (or Urdu text) is never squeezed into one letter per line.
+        if (isDemo || s != null) {
+            Spacer(Modifier.height(8.dp))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                if (isDemo) DemoChip()
+                if (s != null) RiskPill(risk, risk.label().t())
             }
-            if (s != null) RiskPill(risk, risk.label().t())
         }
         Spacer(Modifier.height(10.dp))
         if (s != null) {

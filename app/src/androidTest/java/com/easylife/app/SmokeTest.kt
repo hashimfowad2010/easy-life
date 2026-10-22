@@ -42,8 +42,13 @@ class SmokeTest {
             ?: File(instrumentation.targetContext.getExternalFilesDir(null), "screenshots")).apply { mkdirs() }
     }
 
-    private fun setLocale(tag: String) = instrumentation.runOnMainSync {
-        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag))
+    /**
+     * On Android 13+ AppCompat reaches the system LocaleManager through a live activity, so with no activity open
+     * the call silently does nothing. Always switch while the app is on screen (as a user does in Settings).
+     */
+    private fun setLocale(tag: String) {
+        scenario!!.onActivity { AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(tag)) }
+        compose.waitForIdle()
     }
 
     private fun waitText(text: String, timeout: Long = 20_000) =
@@ -92,8 +97,8 @@ class SmokeTest {
     }
 
     private fun runFlow() {
-        setLocale("en")
         scenario = ActivityScenario.launch(MainActivity::class.java)
+        setLocale("en")
 
         // Onboarding (English is already the app language, so choosing it does not restart the screen).
         waitText("Welcome to Easy Life")
@@ -158,10 +163,9 @@ class SmokeTest {
         click("Settings")
         waitText("Language")
         shot("en-11-settings")
-        scenario?.close()
-
-        // Urdu: the whole UI right-to-left.
+        // Urdu: the whole UI right-to-left. Switch while the app is open, then start fresh on Today.
         setLocale("ur")
+        scenario?.close()
         scenario = ActivityScenario.launch(MainActivity::class.java)
         waitText("بجلی گارڈ", 30_000)
         shot("ur-01-today")
