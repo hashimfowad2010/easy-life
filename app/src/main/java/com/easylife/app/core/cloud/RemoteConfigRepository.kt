@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Remote Config with bundled defaults for every key (assets/config/*.json and assets/ai/prompts.json).
+ * Remote Config with bundled defaults for every key (the JSON files in assets/config and assets/ai/prompts.json).
  * Tariffs, AI routing, prompts and retailer lists can change without an app update.
  */
 @Singleton

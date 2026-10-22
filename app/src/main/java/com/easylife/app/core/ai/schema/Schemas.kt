@@ -2,7 +2,7 @@ package com.easylife.app.core.ai.schema
 
 import kotlinx.serialization.Serializable
 
-// One data class per AI task. These mirror ai-prompts/schemas/*.json exactly; every provider returns them.
+// One data class per AI task. These mirror the JSON schemas in ai-prompts/schemas; every provider returns them.
 
 @Serializable
 data class ClassifyResult(
