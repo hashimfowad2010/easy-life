@@ -1,0 +1,47 @@
+# --- Secrets and personal data: NEVER commit (see CLAUDE.md) ---
+.env
+.env.*
+*.jks
+*.keystore
+*.p12
+*.pem
+keystore.properties
+google-services.json
+service-account*.json
+test-data/
+
+# --- Gradle / Android ---
+.gradle/
+build/
+*/build/
+local.properties
+captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+output-metadata.json
+
+# --- IDEs / OS ---
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# --- Kotlin ---
+.kotlin/
+
+# --- Firebase / Node ---
+firebase/functions/node_modules/
+firebase/functions/lib/
+firebase/.firebase/
+firebase/*-debug.log
+firebase/.runtimeconfig.json
+node_modules/
+npm-debug.log*
+
+# --- Local tooling ---
+*.log

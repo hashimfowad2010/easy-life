@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "item": {"type": "string"},
+          "retailer": {"type": "string"},
+          "productTitle": {"type": "string"},
+          "packSize": {"type": ["number", "null"]},
+          "unit": {"type": ["string", "null"]},
+          "pricePkr": {"type": "number"},
+          "url": {"type": "string"},
+          "seenAt": {"type": "string"}
+        },
+        "required": ["item", "retailer", "productTitle", "pricePkr", "url"]
+      }
+    },
+    "notFound": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["results"]
+}

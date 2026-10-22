@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nameEn": {"type": "string"},
+          "nameUr": {"type": "string"},
+          "itemKey": {"type": "string"},
+          "qty": {"type": "number"},
+          "unit": {"type": ["string", "null"]},
+          "brandPref": {"type": ["string", "null"]},
+          "category": {"type": "string"}
+        },
+        "required": ["nameEn", "nameUr", "itemKey", "qty"]
+      }
+    },
+    "confidence": {"type": "number"}
+  },
+  "required": ["items", "confidence"]
+}

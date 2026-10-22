@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "billType": {"type": "string", "enum": ["electricity", "gas", "water", "internet", "mobile_postpaid", "school_fee", "rent", "other"]},
+    "provider": {"type": ["string", "null"]},
+    "referenceNo": {"type": ["string", "null"]},
+    "billingMonth": {"type": ["string", "null"]},
+    "issueDate": {"type": ["string", "null"]},
+    "dueDate": {"type": ["string", "null"]},
+    "readingDate": {"type": ["string", "null"]},
+    "amountWithinDue": {"type": ["number", "null"]},
+    "amountAfterDue": {"type": ["number", "null"]},
+    "unitsConsumed": {"type": ["integer", "null"]},
+    "previousReading": {"type": ["number", "null"]},
+    "presentReading": {"type": ["number", "null"]},
+    "consumerStatusPrinted": {"type": "string", "enum": ["protected", "non_protected", "unknown"]},
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "month": {"type": "string"},
+          "units": {"type": ["integer", "null"]},
+          "amount": {"type": ["number", "null"]}
+        },
+        "required": ["month"]
+      }
+    },
+    "confidence": {"type": "number"},
+    "uncertainFields": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["billType", "confidence", "uncertainFields"]
+}

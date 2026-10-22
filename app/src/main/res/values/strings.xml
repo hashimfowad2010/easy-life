@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- In-app text lives in core/i18n (typed en+ur tables). Only strings Android itself needs are here. -->
+<resources>
+    <string name="app_name">Easy Life</string>
+</resources>

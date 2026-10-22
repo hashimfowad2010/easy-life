@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "text": {"type": "string"},
+    "notes": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": "number"}
+  },
+  "required": ["text", "confidence"]
+}

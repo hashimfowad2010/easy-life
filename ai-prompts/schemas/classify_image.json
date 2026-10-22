@@ -1,0 +1,10 @@
+{
+  "type": "object",
+  "properties": {
+    "kind": {"type": "string", "enum": ["electricity_bill", "gas_bill", "water_bill", "internet_bill", "mobile_bill", "school_fee", "other_bill", "meter", "receipt", "price_tag", "document", "unknown"]},
+    "alternatives": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": "number"},
+    "uncertainFields": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["kind", "confidence"]
+}

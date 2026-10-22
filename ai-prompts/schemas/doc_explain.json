@@ -1,0 +1,33 @@
+{
+  "type": "object",
+  "properties": {
+    "docType": {"type": "string", "enum": ["school_circular", "bill", "form", "letter", "medical", "legal", "notice", "other"]},
+    "summaryUr": {"type": "array", "items": {"type": "string"}},
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "textUr": {"type": "string"},
+          "dueDate": {"type": ["string", "null"]},
+          "amount": {"type": ["number", "null"]}
+        },
+        "required": ["textUr"]
+      }
+    },
+    "keyDetails": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "labelUr": {"type": "string"},
+          "value": {"type": "string"}
+        },
+        "required": ["labelUr", "value"]
+      }
+    },
+    "summaryEn": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": "number"}
+  },
+  "required": ["docType", "summaryUr", "actions", "keyDetails", "summaryEn", "confidence"]
+}

@@ -1,0 +1,27 @@
+{
+  "type": "object",
+  "properties": {
+    "storeName": {"type": ["string", "null"]},
+    "storeArea": {"type": ["string", "null"]},
+    "date": {"type": ["string", "null"]},
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {"type": "string"},
+          "qty": {"type": "number"},
+          "packSize": {"type": ["number", "null"]},
+          "unit": {"type": ["string", "null"]},
+          "lineTotal": {"type": ["number", "null"]},
+          "unitPrice": {"type": ["number", "null"]}
+        },
+        "required": ["name"]
+      }
+    },
+    "total": {"type": ["number", "null"]},
+    "confidence": {"type": "number"},
+    "uncertainFields": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["items", "confidence"]
+}

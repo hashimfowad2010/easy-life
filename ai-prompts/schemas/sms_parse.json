@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "isTransaction": {"type": "boolean"},
+    "kind": {"type": ["string", "null"], "enum": ["transaction", "security", "promo", "other", null]},
+    "amount": {"type": ["number", "null"]},
+    "currency": {"type": ["string", "null"]},
+    "direction": {"type": ["string", "null"], "enum": ["debit", "credit", null]},
+    "channel": {"type": ["string", "null"]},
+    "counterparty": {"type": ["string", "null"]},
+    "merchant": {"type": ["string", "null"]},
+    "referenceId": {"type": ["string", "null"]},
+    "balanceAfter": {"type": ["number", "null"]},
+    "timestamp": {"type": ["string", "null"]},
+    "isRefund": {"type": ["boolean", "null"]},
+    "confidence": {"type": "number"},
+    "uncertainFields": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["isTransaction", "confidence"]
+}

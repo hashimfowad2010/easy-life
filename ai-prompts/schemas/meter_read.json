@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "properties": {
+    "reading": {"type": ["number", "null"]},
+    "digitsSeen": {"type": "string"},
+    "unit": {"type": "string", "enum": ["kWh"]},
+    "confidence": {"type": "number"},
+    "issues": {"type": "array", "items": {"type": "string"}},
+    "uncertainFields": {"type": "array", "items": {"type": "string"}}
+  },
+  "required": ["reading", "digitsSeen", "unit", "confidence", "issues"]
+}

@@ -1,0 +1,9 @@
+{
+  "type": "object",
+  "properties": {
+    "linesEn": {"type": "array", "items": {"type": "string"}},
+    "linesUr": {"type": "array", "items": {"type": "string"}},
+    "confidence": {"type": "number"}
+  },
+  "required": ["linesEn", "linesUr"]
+}
