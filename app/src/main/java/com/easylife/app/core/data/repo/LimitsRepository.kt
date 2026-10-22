@@ -11,6 +11,8 @@ import com.easylife.app.core.data.db.MeterEntity
 import com.easylife.app.core.data.db.MeterReadingEntity
 import com.easylife.app.core.data.db.UsageMonthEntity
 import com.easylife.app.core.data.prefs.PrefsRepository
+import com.easylife.app.core.impact.ImpactEvents
+import com.easylife.app.core.impact.ImpactTracker
 import com.easylife.app.core.limits.BillingMode
 import com.easylife.app.core.limits.ConsumerCategory
 import com.easylife.app.core.limits.LimitEngine
@@ -56,6 +58,7 @@ class LimitsRepository @Inject constructor(
     private val applianceDao: ApplianceDao,
     private val config: RemoteConfigRepository,
     private val prefs: PrefsRepository,
+    private val impact: ImpactTracker,
 ) {
     val meters: Flow<List<MeterEntity>> = meterDao.observeMeters()
 
@@ -141,6 +144,7 @@ class LimitsRepository @Inject constructor(
         val existing = referenceNo?.let { meterDao.findByReference(it) }?.takeIf { it.isDemo == isDemo } ?: sameKind.firstOrNull()
         val base = existing ?: MeterEntity(name = "Home", provider = provider ?: "LESCO", referenceNo = referenceNo, isDemo = isDemo)
         val newer = readingDate != null && (base.cycleStartDate == null || !readingDate.isBefore(base.cycleStartDate))
+        if (existing != null && newer && !isDemo && unitsConsumed != null) logCycleOutcome(existing, unitsConsumed)
         val updated = base.copy(
             provider = provider ?: base.provider,
             referenceNo = referenceNo ?: base.referenceNo,
@@ -153,6 +157,19 @@ class LimitsRepository @Inject constructor(
         if (billingMonth != null && unitsConsumed != null) months += UsageMonthEntity(id, billingMonth.toString(), unitsConsumed, amount, source, isDemo)
         if (months.isNotEmpty()) meterDao.upsertUsage(months)
         return id
+    }
+
+    /**
+     * The bill closes the meter's cycle. If Bijli Guard warned during that cycle (AlertEngine keys
+     * "limit:<meter>:<cycleStart>:<risk>") and the cycle still ended under the limit, count it once: the clearest
+     * sign the warning helped (spec section 8).
+     */
+    private suspend fun logCycleOutcome(meter: MeterEntity, units: Int) {
+        val prefix = "limit:${meter.id}:${meter.cycleStartDate ?: ""}"
+        val warned = prefs.notifiedKeys().any { it.startsWith(prefix) }
+        if (warned && units <= meter.limitUnits && prefs.markNotifiedOnce("cycle-under:${meter.id}:${meter.cycleStartDate}")) {
+            impact.log(ImpactEvents.CYCLE_UNDER_AFTER_WARNING, "limits", units.toDouble())
+        }
     }
 
     // ---- custom limits

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Assessment
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.DeleteForever
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.LocationCity
 import androidx.compose.material.icons.rounded.Notifications
 import androidx.compose.material.icons.rounded.Policy
+import androidx.compose.material.icons.rounded.RateReview
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material.icons.rounded.UploadFile
@@ -69,6 +71,8 @@ import com.easylife.app.core.i18n.currentLanguage
 import com.easylife.app.core.i18n.t
 import com.easylife.app.feature.onboarding.PakistanCities
 import com.easylife.app.navigation.DevToolsRoute
+import com.easylife.app.navigation.FeedbackRoute
+import com.easylife.app.navigation.ImpactReportRoute
 import com.easylife.app.navigation.LocalSnackbar
 import com.easylife.app.navigation.NotificationSettingsRoute
 import com.easylife.app.navigation.PrivacyRoute
@@ -149,6 +153,8 @@ fun SettingsScreen(nav: NavHostController, vm: SettingsViewModel = hiltViewModel
         SectionHeader(SSettings.impactSection.t(), Modifier.padding(horizontal = 8.dp))
         SettingsSwitchRow(SSettings.impactOptIn.t(), checked = p.impactOptIn, onCheckedChange = vm::setImpact, icon = Icons.Rounded.VolunteerActivism)
         SettingsSwitchRow(SSettings.demoMode.t(), subtitle = SSettings.demoModeNote.t(), checked = p.demoMode, onCheckedChange = vm::setDemo, icon = Icons.Rounded.Science)
+        SettingsNavRow(SSettings.impactReport.t(), icon = Icons.Rounded.Assessment, onClick = { nav.navigate(ImpactReportRoute) })
+        SettingsNavRow(SSettings.feedback.t(), icon = Icons.Rounded.RateReview, onClick = { nav.navigate(FeedbackRoute) })
 
         SectionHeader(SSettings.about.t(), Modifier.padding(horizontal = 8.dp))
         val versionText = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"

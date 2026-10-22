@@ -30,6 +30,7 @@ object ImpactEvents {
     const val SCAN_DONE = "scan_done"
     const val METER_READING = "meter_reading_added"
     const val APP_OPEN = "app_open"
+    const val FEEDBACK = "feedback_given"
 }
 
 /**

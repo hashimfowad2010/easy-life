@@ -67,6 +67,11 @@ sealed interface TodayCard {
         override val priority = 30
     }
 
+    /** Ask for feedback after 3 days of use (spec section 8). */
+    data object Feedback : TodayCard {
+        override val priority = 20
+    }
+
     data object SetupMeter : TodayCard {
         override val priority = 5
     }
@@ -154,6 +159,7 @@ class TodayViewModel @Inject constructor(
         if (Module.BUDGET in prefs.enabledModules) cards += extras.budgets
         reminders.filter { !it.date.isAfter(today.plusDays(3)) }.forEach { cards += TodayCard.Reminder(it) }
         if (reviews > 0) cards += TodayCard.Review(reviews)
+        if (feedbackDue(prefs, java.time.Instant.now())) cards += TodayCard.Feedback
         TodayState(
             loading = false,
             prefs = prefs,
@@ -196,7 +202,19 @@ class TodayViewModel @Inject constructor(
         }
     }
 
+    fun snoozeFeedback() {
+        viewModelScope.launch { prefsRepo.snoozeFeedback() }
+    }
+
     fun turnOffDemo() {
         viewModelScope.launch { demo.clear() }
     }
+}
+
+/** Feedback is asked once the app has been in use for 3 days; "Later" waits another 3 days. Never during a demo. */
+fun feedbackDue(p: UserPrefs, now: java.time.Instant): Boolean {
+    if (p.feedbackDone || p.demoMode) return false
+    val installed = p.installedAt ?: return false
+    val from = maxOf(installed, p.feedbackSnoozedAt ?: installed)
+    return !now.isBefore(from.plus(3, ChronoUnit.DAYS))
 }

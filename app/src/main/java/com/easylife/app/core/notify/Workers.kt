@@ -12,6 +12,7 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.easylife.app.core.devtools.ErrorLog
+import com.easylife.app.core.impact.FeedbackRepository
 import com.easylife.app.core.impact.ImpactUploader
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -37,16 +38,18 @@ class DailyCheckWorker @AssistedInject constructor(
     }
 }
 
-/** Uploads anonymous impact events, only if the user opted in (checked inside the uploader). */
+/** Uploads anonymous impact events (only if the user opted in, checked inside the uploader) and unsent feedback. */
 @HiltWorker
 class ImpactUploadWorker @AssistedInject constructor(
     @Assisted context: Context,
     @Assisted params: WorkerParameters,
     private val uploader: ImpactUploader,
+    private val feedback: FeedbackRepository,
     private val errorLog: ErrorLog,
 ) : CoroutineWorker(context, params) {
     override suspend fun doWork(): Result = try {
         uploader.uploadPending()
+        feedback.retryPending()
         Result.success()
     } catch (e: Exception) {
         errorLog.record("impact-upload", e)

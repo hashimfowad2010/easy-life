@@ -63,6 +63,8 @@ import com.easylife.app.feature.onboarding.OnboardingScreen
 import com.easylife.app.feature.scan.ScanConfirmScreen
 import com.easylife.app.feature.scan.ScanSheet
 import com.easylife.app.feature.scan.ScanSheetViewModel
+import com.easylife.app.feature.settings.FeedbackScreen
+import com.easylife.app.feature.settings.ImpactReportScreen
 import com.easylife.app.feature.settings.NotificationSettingsScreen
 import com.easylife.app.feature.settings.PrivacyScreen
 import com.easylife.app.feature.settings.SettingsScreen
@@ -144,6 +146,8 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
                 composable<SmartAiRoute> { SmartAiScreen(onBack = { nav.popBackStack() }) }
                 composable<PrivacyRoute> { PrivacyScreen(onBack = { nav.popBackStack() }) }
                 composable<NotificationSettingsRoute> { NotificationSettingsScreen(onBack = { nav.popBackStack() }) }
+                composable<ImpactReportRoute> { ImpactReportScreen(onBack = { nav.popBackStack() }) }
+                composable<FeedbackRoute> { FeedbackScreen(onBack = { nav.popBackStack() }) }
 
                 composable<DevToolsRoute> { DevToolsScreen(nav = nav) }
                 composable<ParserLabRoute> { ParserLabScreen(onBack = { nav.popBackStack() }) }

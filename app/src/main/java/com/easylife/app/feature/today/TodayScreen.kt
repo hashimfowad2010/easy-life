@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.FactCheck
+import androidx.compose.material.icons.rounded.RateReview
 import androidx.compose.material.icons.rounded.Science
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -42,6 +43,7 @@ import com.easylife.app.core.designsystem.SourceChip
 import com.easylife.app.core.designsystem.TintedIcon
 import com.easylife.app.core.i18n.AppLanguage
 import com.easylife.app.core.i18n.Fmt
+import com.easylife.app.core.i18n.SImpact
 import com.easylife.app.core.i18n.SLimits
 import com.easylife.app.core.i18n.SToday
 import com.easylife.app.core.i18n.currentLanguage
@@ -50,6 +52,7 @@ import com.easylife.app.feature.bills.BillRow
 import com.easylife.app.feature.limits.MeterSummaryCard
 import com.easylife.app.navigation.AddReadingRoute
 import com.easylife.app.navigation.BillDetailRoute
+import com.easylife.app.navigation.FeedbackRoute
 import com.easylife.app.navigation.LimitsRoute
 import com.easylife.app.navigation.MeterSetupRoute
 import java.time.LocalDate
@@ -85,7 +88,7 @@ fun TodayScreen(nav: NavHostController, onScan: () -> Unit, vm: TodayViewModel =
                 })
             }
         }
-        if (s.cards.isEmpty() || s.cards.all { it is TodayCard.SetupMeter }) {
+        if (s.cards.all { it is TodayCard.SetupMeter || it is TodayCard.Feedback }) {
             item { GetStartedCard(onScan = onScan, onManual = { nav.navigate(MeterSetupRoute()) }, onDemo = vm::loadDemo) }
         }
         items(s.cards.filterNot { it is TodayCard.SetupMeter }, key = { it.key() }) { card ->
@@ -122,6 +125,20 @@ fun TodayScreen(nav: NavHostController, onScan: () -> Unit, vm: TodayViewModel =
                         color = EasyTheme.colors.risk(card.status.risk),
                     )
                     Text(com.easylife.app.feature.budget.budgetLine(card.status, name, lang), style = MaterialTheme.typography.bodySmall)
+                }
+                TodayCard.Feedback -> EasyCard {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        TintedIcon(Icons.Rounded.RateReview, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(SImpact.todayTitle.t(), style = MaterialTheme.typography.titleMedium)
+                            Text(SImpact.todayBody.t(), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
+                    Row(Modifier.align(Alignment.End)) {
+                        TextButton(onClick = vm::snoozeFeedback) { Text(SImpact.later.t()) }
+                        TextButton(onClick = { nav.navigate(FeedbackRoute) }) { Text(com.easylife.app.core.i18n.SSettings.feedback.t()) }
+                    }
                 }
                 TodayCard.SetupMeter -> Unit
             }
@@ -163,6 +180,7 @@ private fun TodayCard.key(): String = when (this) {
     is TodayCard.Reminder -> "rem-${reminder.id}"
     is TodayCard.Review -> "review"
     is TodayCard.Budget -> "budget-${category.key}"
+    TodayCard.Feedback -> "feedback"
     TodayCard.SetupMeter -> "setup"
 }
 

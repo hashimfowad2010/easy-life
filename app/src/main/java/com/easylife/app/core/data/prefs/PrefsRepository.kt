@@ -92,6 +92,7 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
         val installedAt = longPreferencesKey("installed_at")
         val feedbackDone = booleanPreferencesKey("feedback_done")
         val feedbackSnoozed = longPreferencesKey("feedback_snoozed_at")
+        val pendingFeedback = stringPreferencesKey("pending_feedback")
         val smsSetup = booleanPreferencesKey("sms_setup_done")
         val notifListener = booleanPreferencesKey("notification_listener")
         val keepRawSms = booleanPreferencesKey("keep_raw_sms")
@@ -180,6 +181,10 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
     suspend fun setDevToolsUnlocked(v: Boolean) = context.dataStore.edit { it[K.dev] = v }
     suspend fun setFeedbackDone() = context.dataStore.edit { it[K.feedbackDone] = true }
     suspend fun snoozeFeedback() = context.dataStore.edit { it[K.feedbackSnoozed] = System.currentTimeMillis() }
+
+    /** Feedback written while offline (or before Firebase is connected), sent later by the upload worker. */
+    suspend fun pendingFeedback(): String? = context.dataStore.data.first()[K.pendingFeedback]
+    suspend fun setPendingFeedback(json: String?) = context.dataStore.edit { if (json == null) it.remove(K.pendingFeedback) else it[K.pendingFeedback] = json }
     suspend fun setSmsSetupDone(v: Boolean) = context.dataStore.edit { it[K.smsSetup] = v }
     suspend fun setNotificationListenerEnabled(v: Boolean) = context.dataStore.edit { it[K.notifListener] = v }
     suspend fun setKeepRawSms(v: Boolean) = context.dataStore.edit { it[K.keepRawSms] = v }
@@ -188,6 +193,8 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
     suspend fun setTtsGuideShown() = context.dataStore.edit { it[K.ttsGuide] = true }
 
     /** Notification de-duplication: returns true the first time a key is seen. */
+    suspend fun notifiedKeys(): Set<String> = context.dataStore.data.first()[K.notified].orEmpty()
+
     suspend fun markNotifiedOnce(key: String): Boolean {
         var first = false
         context.dataStore.edit { p ->
