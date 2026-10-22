@@ -222,7 +222,7 @@ private fun TextTab(vm: UrduViewModel) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(if (s.fromUrdu) SUrdu.urToEn.t() else SUrdu.enToUr.t(), style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-            IconButton(onClick = vm::swap) { Icon(Icons.Rounded.SwapHoriz, null) }
+            IconButton(onClick = vm::swap) { Icon(Icons.Rounded.SwapHoriz, SUrdu.swapDirection.t()) }
         }
         FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             FilterChip(s.mode == TranslateMode.NORMAL, { vm.setMode(TranslateMode.NORMAL) }, { Text(SUrdu.modeNormal.t()) })

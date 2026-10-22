@@ -124,6 +124,16 @@ Claude API list prices (checked 23 Oct 2026): **Haiku 5.5** USD 0.10 / 0.50 and 
 
 **A typical family** (3 bills, 6 meter photos, 4 receipts, 3 documents, 10 SMS, 4 translations, 4 summaries and 1 price search a month): **about $0.45 (Rs 125) a month. 100 families: about $45 (Rs 12,500) a month.** PKR at 280 per USD. Most work still runs on the phone for free; Smart AI is for accuracy on difficult photos and simple-Urdu explanations.
 
+## Collecting pilot results (for ILAP)
+
+Each phone can make its own report: **Settings → Help the project → ILAP impact report** (CSV or a one-page PDF). To combine all pilot phones (only those that turned on "Share anonymous counts", plus all feedback), run this on your own computer with the service-account key (never in GitHub Actions, whose files are public on a public repo):
+
+```bash
+cd firebase/functions && npm ci && node scripts/impact-aggregate.mjs --key path/to/service-account.json --out ../../impact-results
+```
+
+It writes `impact-by-pilot.csv` (events per pilot code, number of phones), `feedback-by-pilot.csv` and `feedback-comments.csv`. The `impact-results/` folder is git-ignored.
+
 ## Limitations (honest)
 
 - On-device parsers were built and tested on **fictional** bills and SMS. Real bills vary; Parser Lab (Settings → tap version 7 times) is there to tune them with real samples kept off GitHub (see [test-data.README.md](test-data.README.md)).

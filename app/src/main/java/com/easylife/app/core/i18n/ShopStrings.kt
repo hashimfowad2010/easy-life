@@ -88,5 +88,4 @@ object SShop {
     val onlineBusy = Txt("Smart AI is busy or today's limit is reached. Try again later.", "سمارٹ AI مصروف ہے یا آج کی حد پوری ہو گئی۔ بعد میں کوشش کریں۔")
     val onlineOffline = Txt("No internet. Try again when you are online.", "انٹرنیٹ نہیں ہے۔ آن لائن ہو کر دوبارہ کوشش کریں۔")
     val onlineFailed = Txt("Online search did not work this time.", "اس بار آن لائن تلاش نہیں ہو سکی۔")
-    val perUnit = Txt("%1\$s per %2\$s", "فی %2\$s %1\$s")
 }

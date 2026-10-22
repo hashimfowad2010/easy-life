@@ -1,6 +1,7 @@
 package com.easylife.app.core.i18n
 
 object SUrdu {
+    val swapDirection = Txt("Swap languages", "زبانیں بدلیں")
     val title = Txt("Urdu Helper", "اردو مددگار")
     val tabText = Txt("Text", "متن")
     val tabScan = Txt("Scan & Read", "اسکین اور پڑھیں")

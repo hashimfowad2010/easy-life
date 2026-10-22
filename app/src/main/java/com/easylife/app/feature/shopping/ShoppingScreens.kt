@@ -90,6 +90,7 @@ import com.easylife.app.core.i18n.currentLanguage
 import com.easylife.app.core.i18n.t
 import com.easylife.app.core.shopping.Dimension
 import com.easylife.app.core.shopping.ItemOption
+import com.easylife.app.core.shopping.Quantity
 import com.easylife.app.core.shopping.StorePlan
 import com.easylife.app.core.speech.rememberSpeechState
 import com.easylife.app.navigation.CompareRoute
@@ -337,8 +338,7 @@ private fun OnlineResults(state: OnlineSearchState, items: List<ShoppingItemEnti
                             Text(r.productTitle, style = MaterialTheme.typography.bodyMedium)
                             val pack = r.packSize?.let { "${Fmt.smart(it)} ${r.unit ?: ""}".trim() }
                             val perUnit = r.unitPrice?.let { up ->
-                                val per = when (r.unit) { "g", "kg" -> "kg"; "ml", "l" -> "l"; "dozen", "piece" -> "piece"; else -> r.unit ?: "packet" }
-                                SShop.perUnit.t(Fmt.rupees(up, lang), per)
+                                SShop.perUnit.t(Fmt.rupees(up, lang), unitTxt(Quantity.of(1.0, r.unit).dimension).t())
                             }
                             Text(listOfNotNull(Fmt.rupees(r.pricePkr, lang), pack, perUnit).joinToString(" · "), style = MaterialTheme.typography.titleSmall)
                             Row {

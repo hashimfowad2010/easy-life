@@ -9,6 +9,7 @@ keystore.properties
 google-services.json
 service-account*.json
 test-data/
+impact-results/
 
 # --- Gradle / Android ---
 .gradle/

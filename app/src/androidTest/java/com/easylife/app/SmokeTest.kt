@@ -189,5 +189,28 @@ class SmokeTest {
         waitText("کرنے کے کام")
         shot("ur-04-urdu-document")
         scenario?.close()
+
+        // 200 % font size (Android Settings → Display → Font size) in Urdu, the tallest script: still usable.
+        setFontScale(2.0f)
+        try {
+            scenario = ActivityScenario.launch(MainActivity::class.java)
+            waitText("بجلی گارڈ", 30_000)
+            shot("ur-large-01-today")
+            click("بجلی گارڈ")
+            waitText("روزانہ کی حد")
+            shot("ur-large-02-bijli-guard")
+            back()
+            click("سیٹنگز")
+            waitText("زبان")
+            shot("ur-large-03-settings")
+            scenario?.close()
+        } finally {
+            setFontScale(1.0f)
+        }
+    }
+
+    private fun setFontScale(scale: Float) {
+        instrumentation.uiAutomation.executeShellCommand("settings put system font_scale $scale").close()
+        Thread.sleep(1_000)
     }
 }
