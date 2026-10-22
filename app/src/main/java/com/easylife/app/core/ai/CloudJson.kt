@@ -28,7 +28,7 @@ object CloudJson {
 
     /** Pulls the first JSON object out of a reply that may be wrapped in ``` fences or text. */
     fun extractObject(raw: String): String? {
-        val s = raw.trim().removePrefix("﻿")
+        val s = raw.trim().trimStart { it.code == 0xFEFF }
         val start = s.indexOf('{')
         val end = s.lastIndexOf('}')
         if (start < 0 || end <= start) return null

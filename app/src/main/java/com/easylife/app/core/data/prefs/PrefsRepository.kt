@@ -32,6 +32,8 @@ data class UserPrefs(
     val city: String = "Lahore",
     val pilotCode: String? = null,
     val impactOptIn: Boolean = false,
+    /** Only events created after this moment are ever uploaded. */
+    val impactOptInAt: Instant? = null,
     val anonId: String = "",
     val smartAiEnabled: Boolean = false,
     val geminiConsentAt: Instant? = null,
@@ -70,6 +72,7 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
         val city = stringPreferencesKey("city")
         val pilotCode = stringPreferencesKey("pilot_code")
         val impactOptIn = booleanPreferencesKey("impact_opt_in")
+        val impactOptInAt = longPreferencesKey("impact_opt_in_at")
         val anonId = stringPreferencesKey("anon_id")
         val smartAi = booleanPreferencesKey("smart_ai")
         val geminiConsent = longPreferencesKey("gemini_consent_at")
@@ -107,6 +110,7 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
             city = p[K.city] ?: "Lahore",
             pilotCode = p[K.pilotCode],
             impactOptIn = p[K.impactOptIn] ?: false,
+            impactOptInAt = p[K.impactOptInAt]?.let(Instant::ofEpochMilli),
             anonId = p[K.anonId] ?: "",
             smartAiEnabled = p[K.smartAi] ?: false,
             geminiConsentAt = p[K.geminiConsent]?.let(Instant::ofEpochMilli),
@@ -152,7 +156,10 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
     suspend fun setPilotCode(code: String?) = context.dataStore.edit {
         if (code.isNullOrBlank()) it.remove(K.pilotCode) else it[K.pilotCode] = code.trim().uppercase()
     }
-    suspend fun setImpactOptIn(v: Boolean) = context.dataStore.edit { it[K.impactOptIn] = v }
+    suspend fun setImpactOptIn(v: Boolean) = context.dataStore.edit {
+        it[K.impactOptIn] = v
+        if (v) it[K.impactOptInAt] = System.currentTimeMillis() else it.remove(K.impactOptInAt)
+    }
     suspend fun setSmartAiEnabled(v: Boolean) = context.dataStore.edit { it[K.smartAi] = v }
     suspend fun setGeminiConsent(given: Boolean) = context.dataStore.edit {
         if (given) it[K.geminiConsent] = System.currentTimeMillis() else it.remove(K.geminiConsent)

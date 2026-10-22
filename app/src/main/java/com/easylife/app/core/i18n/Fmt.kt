@@ -16,8 +16,8 @@ import kotlin.math.roundToLong
  * In Urdu, numeric runs are wrapped in Unicode isolates so "142 / 200" is never visually reversed.
  */
 object Fmt {
-    private const val LRI = '⁦'
-    private const val PDI = '⁩'
+    private val LRI = Char(0x2066) // LEFT-TO-RIGHT ISOLATE
+    private val PDI = Char(0x2069) // POP DIRECTIONAL ISOLATE
 
     private val symbols = DecimalFormatSymbols(Locale.US)
 

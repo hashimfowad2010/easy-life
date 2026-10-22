@@ -15,6 +15,14 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
+abstract class DemoBindings {
+    /** Modules add their demo data via @IntoSet; the set may be empty. */
+    @dagger.multibindings.Multibinds
+    abstract fun demoContributors(): Set<com.easylife.app.core.data.repo.DemoContributor>
+}
+
+@Module
+@InstallIn(SingletonComponent::class)
 object DataModule {
 
     @Provides
