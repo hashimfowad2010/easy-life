@@ -1,0 +1,5 @@
+{
+  "gemini_enabled": "false",
+  "gemini_model": "gemini-3.8-flash",
+  "claude_enabled": "false"
+}

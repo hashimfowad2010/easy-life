@@ -1,0 +1,8 @@
+PTCL Pakistan Telecommunication Company Ltd (fictional sample)
+Account ID 0000000000
+Bill Month   Sep-2026
+Bill Date   05 Oct 2026
+Due Date   20 Oct 2026
+Current Charges   2,999
+Amount Payable By Due Date   3,499
+Amount Payable After Due Date   3,649

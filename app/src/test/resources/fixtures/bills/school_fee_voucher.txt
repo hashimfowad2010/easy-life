@@ -1,0 +1,13 @@
+SAMPLE GRAMMAR SCHOOL (FICTIONAL)
+FEE VOUCHER - PARENT COPY
+Voucher No: 2026-10-00123
+Student Name: SAMPLE STUDENT
+Class: 7-B
+Fee for the month of: October 2026
+Issue Date: 01/10/2026
+Due Date: 10/10/2026
+Tuition Fee   12,500
+Computer Lab   1,000
+Total Payable within due date   13,500
+Late fee after due date   500
+Payable after due date   14,000

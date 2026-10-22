@@ -1,0 +1,12 @@
+{
+  "version": "2026-10-22",
+  "note": "Search URL patterns checked on 2026-10-22 (each returned HTTP 200 for a 'sugar' search). The app only opens these pages in the browser; it never logs in or scrapes.",
+  "retailers": [
+    {"id": "alfatah", "name": "Al-Fatah", "searchUrl": "https://alfatah.pk/search?q={q}", "domains": ["alfatah.pk"], "grocery": true, "verifiedOn": "2026-10-22"},
+    {"id": "naheed", "name": "Naheed", "searchUrl": "https://www.naheed.pk/catalogsearch/result/?q={q}", "domains": ["naheed.pk"], "grocery": true, "verifiedOn": "2026-10-22"},
+    {"id": "metro", "name": "Metro Online", "searchUrl": "https://www.metro-online.pk/search/{q}", "domains": ["metro-online.pk"], "grocery": true, "verifiedOn": "2026-10-22"},
+    {"id": "imtiaz", "name": "Imtiaz", "searchUrl": "https://shop.imtiaz.com.pk/search?q={q}", "domains": ["imtiaz.com.pk"], "grocery": true, "verifiedOn": "2026-10-22"},
+    {"id": "daraz", "name": "Daraz", "searchUrl": "https://www.daraz.pk/catalog/?q={q}", "domains": ["daraz.pk"], "grocery": true, "verifiedOn": "2026-10-22"},
+    {"id": "priceoye", "name": "PriceOye", "searchUrl": "https://priceoye.pk/search?q={q}", "domains": ["priceoye.pk"], "grocery": false, "verifiedOn": "2026-10-22"}
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "classify_image": ["claude", "gemini_free", "on_device"],
+  "meter_read": ["claude", "gemini_free", "on_device"],
+  "bill_extract": ["claude", "gemini_free", "on_device"],
+  "receipt_extract": ["claude", "gemini_free", "on_device"],
+  "sms_parse": ["on_device", "claude"],
+  "translate": ["on_device", "claude", "gemini_free"],
+  "doc_explain": ["claude", "gemini_free", "on_device"],
+  "list_normalize": ["on_device", "claude", "gemini_free"],
+  "weekly_summary": ["claude", "gemini_free", "on_device"]
+}

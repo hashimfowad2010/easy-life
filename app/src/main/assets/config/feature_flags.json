@@ -1,0 +1,7 @@
+{
+  "community_prices": true,
+  "notification_listener": true,
+  "statement_import": true,
+  "shopping_beta_label": false,
+  "weekly_summary_card": true
+}

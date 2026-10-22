@@ -1,0 +1,30 @@
+{
+  "version": "2026.10-seed",
+  "effective_from": "2026-07-01",
+  "updated_on": "2026-10-22",
+  "source_note": "Seed 2026 base energy rates (Rs/unit), estimates from the Easy Life build spec. Verify against a real LESCO bill and update via Remote Config.",
+  "lifeline": [
+    {"from": 1, "to": 50, "rate": 3.95},
+    {"from": 51, "to": 100, "rate": 7.74}
+  ],
+  "protected": [
+    {"from": 1, "to": 100, "rate": 10.54},
+    {"from": 101, "to": 200, "rate": 13.01}
+  ],
+  "non_protected": [
+    {"from": 1, "to": 100, "rate": 22.44},
+    {"from": 101, "to": 200, "rate": 28.91},
+    {"from": 201, "to": 300, "rate": 33.10},
+    {"from": 301, "to": 400, "rate": 37.99},
+    {"from": 401, "to": 500, "rate": 40.22},
+    {"from": 501, "to": 600, "rate": 41.62},
+    {"from": 601, "to": 700, "rate": 42.76},
+    {"from": 701, "to": null, "rate": 47.69}
+  ],
+  "billing_mode": {"lifeline": "incremental", "protected": "incremental", "non_protected": "verify_with_real_bill"},
+  "fixed_charges": "verify",
+  "taxes_and_adjustments_multiplier": 1.0,
+  "protected_threshold": 200,
+  "protected_lookback_months": 6,
+  "lifeline_threshold": 100
+}

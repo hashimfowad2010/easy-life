@@ -1,0 +1,14 @@
+SAMPLE MART (FICTIONAL)
+Model Town, Lahore
+Date: 20/10/2026  Time: 18:42
+Basmati Rice 5kg   1,850
+Sugar 1kg   2 x 165   330
+Dalda Cooking Oil 5 Litre   2,950
+Eggs 1 Dozen   390
+Milk 1L   2 x 220   440
+Sub Total   5,960
+GST   0
+Total   5,960
+Cash   6,000
+Change   40
+Thank you for shopping!

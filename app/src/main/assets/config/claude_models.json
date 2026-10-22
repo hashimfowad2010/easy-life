@@ -1,0 +1,13 @@
+{
+  "default": "claude-haiku-5-5",
+  "classify_image": "claude-haiku-5-5",
+  "meter_read": "claude-sonnet-5-5",
+  "bill_extract": "claude-sonnet-5-5",
+  "receipt_extract": "claude-sonnet-5-5",
+  "sms_parse": "claude-haiku-5-5",
+  "translate": "claude-haiku-5-5",
+  "doc_explain": "claude-sonnet-5-5",
+  "list_normalize": "claude-haiku-5-5",
+  "weekly_summary": "claude-haiku-5-5",
+  "shop_search": "claude-sonnet-5-5"
+}
