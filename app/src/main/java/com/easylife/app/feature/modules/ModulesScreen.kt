@@ -53,7 +53,7 @@ import javax.inject.Inject
 private val billsDue = Txt("%1\$s bills due", "%1\$s بل باقی")
 private val noBillsDue = Txt("No bills due", "کوئی بل باقی نہیں")
 private val setUp = Txt("Tap to set up", "ترتیب دینے کے لیے دبائیں")
-private val comingSoon = Txt("Coming in the next update", "اگلی اپ ڈیٹ میں")
+private val shopReady = Txt("Lists, prices, budget check", "فہرست، قیمتیں، بجٹ")
 private val spent = Txt("%1\$s spent this month", "اس مہینے %1\$s خرچ")
 private val urduReady = Txt("Translate, scan, listen", "ترجمہ، اسکین، سنیں")
 
@@ -81,7 +81,7 @@ class ModulesViewModel @Inject constructor(
                     if (spentThisMonth > 0) spent.format(lang, Fmt.rupees(spentThisMonth, lang)) else setUp.get(lang)
                 }
                 Module.URDU -> { lang -> urduReady.get(lang) }
-                else -> { lang -> comingSoon.get(lang) }
+                Module.SHOPPING -> { lang -> shopReady.get(lang) }
             }
             ModuleTile(m, m in p.enabledModules, status)
         }

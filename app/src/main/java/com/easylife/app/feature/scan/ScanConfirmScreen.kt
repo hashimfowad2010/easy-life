@@ -217,7 +217,7 @@ fun ScanConfirmScreen(draftId: String, nav: NavHostController, vm: ScanConfirmVi
                 when {
                     kind.isBill -> nav.navigate(BillConfirmRoute(draftId = draft.id, kind = kind.key))
                     kind == ScanKind.METER -> nav.navigate(AddReadingRoute(meterId = 0, draftId = draft.id))
-                    kind == ScanKind.RECEIPT || kind == ScanKind.PRICE_TAG -> nav.navigate(Module.BUDGET.route())
+                    kind == ScanKind.RECEIPT || kind == ScanKind.PRICE_TAG -> nav.navigate(com.easylife.app.navigation.ReceiptConfirmRoute(draft.id))
                     else -> nav.navigate(com.easylife.app.navigation.UrduRoute(tab = 1, draftId = draft.id))
                 }
             })

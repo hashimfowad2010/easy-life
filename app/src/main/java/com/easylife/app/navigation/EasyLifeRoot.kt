@@ -67,6 +67,10 @@ import com.easylife.app.feature.settings.NotificationSettingsScreen
 import com.easylife.app.feature.settings.PrivacyScreen
 import com.easylife.app.feature.settings.SettingsScreen
 import com.easylife.app.feature.settings.SmartAiScreen
+import com.easylife.app.feature.shopping.CompareScreen
+import com.easylife.app.feature.shopping.ReceiptConfirmScreen
+import com.easylife.app.feature.shopping.ShoppingListScreen
+import com.easylife.app.feature.shopping.ShoppingScreen
 import com.easylife.app.feature.today.TodayScreen
 import com.easylife.app.feature.urdu.DocumentScreen
 import com.easylife.app.feature.urdu.UrduScreen
@@ -81,7 +85,7 @@ fun Module.route(): Any = when (this) {
     Module.BILLS -> BillsRoute
     Module.BUDGET -> BudgetRoute
     Module.URDU -> UrduRoute()
-    Module.SHOPPING -> ComingSoonRoute(name)
+    Module.SHOPPING -> ShoppingRoute
 }
 
 private val topLevel = listOf(TodayRoute::class, ModulesRoute::class, SettingsRoute::class)
@@ -183,6 +187,11 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
                 composable<RulesRoute> { RulesScreen(nav = nav) }
                 composable<BudgetsRoute> { BudgetsScreen(nav = nav) }
                 composable<AddTransactionRoute> { AddTransactionScreen(nav = nav) }
+
+                composable<ShoppingRoute> { ShoppingScreen(nav = nav) }
+                composable<ShoppingListRoute> { entry -> ShoppingListScreen(id = entry.toRoute<ShoppingListRoute>().id, nav = nav) }
+                composable<CompareRoute> { entry -> CompareScreen(listId = entry.toRoute<CompareRoute>().listId, nav = nav) }
+                composable<ReceiptConfirmRoute> { entry -> ReceiptConfirmScreen(draftId = entry.toRoute<ReceiptConfirmRoute>().draftId, nav = nav) }
 
                 composable<ComingSoonRoute> { entry -> ComingSoonScreen(module = entry.toRoute<ComingSoonRoute>().module, onBack = { nav.popBackStack() }) }
             }

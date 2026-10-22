@@ -261,4 +261,3 @@ fun BudgetScreen(nav: NavHostController, vm: BudgetViewModel = hiltViewModel()) 
     }
 }
 
-private fun Modifier.fillMaxWidth() = this.then(androidx.compose.foundation.layout.fillMaxWidth())
