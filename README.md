@@ -6,9 +6,9 @@ Built for ILAP 2027 by a student of Beaconhouse BSS JTC, Lahore. Free, works off
 
 **[⬇ Download the latest APK](https://github.com/hashimfowad2010/easy-life/releases/latest/download/EasyLife.apk)** · [All releases](https://github.com/hashimfowad2010/easy-life/releases)
 
-| Today (demo data) | Bijli Guard | اردو میں |
-|---|---|---|
-| ![Today](docs/screenshots/en-today.png) | ![Bijli Guard](docs/screenshots/en-bijli-guard.png) | ![Urdu Today](docs/screenshots/ur-today.png) |
+| Today (demo data) | Bijli Guard | اردو میں | Your colours |
+|---|---|---|---|
+| ![Today](docs/screenshots/en-today.png) | ![Bijli Guard](docs/screenshots/en-bijli-guard.png) | ![Urdu Today](docs/screenshots/ur-today.png) | ![Colour choices](docs/screenshots/en-settings-colours.png) |
 
 *Screenshots are taken automatically by the emulator test in CI, using the app's fictional demo family.*
 
@@ -17,7 +17,7 @@ Built for ILAP 2027 by a student of Beaconhouse BSS JTC, Lahore. Free, works off
 ## What it does
 
 | Module | The problem | What Easy Life does |
-|---|---|---|
+|---|---|---|---|
 | ⚡ **Bijli Guard** (Limits) | Households that use 200 units or less a month for 6 months are "protected" and pay a much lower rate. One month over 200 loses that for 6 months. | Reads the bill and meter photos, projects the month's units, warns early ("At this pace you'll reach 234 units by 9 Nov. Keep to 5.6 units a day"), shows the money at stake, flags late meter readings, and suggests appliance changes. |
 | 🧾 **Bills** | Late fees and forgotten due dates. | Scan any utility/school bill, confirm the numbers, get reminders before the due date, see "Pay by 24 Oct to save Rs 538". |
 | 💰 **Budget** | People don't know where money goes, and banking apps aren't in Urdu. | Reads bank and wallet SMS on the phone (never bank passwords; OTPs are discarded at once), categories, budgets, exclusions (e.g. money sent to family), receipts. |
