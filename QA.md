@@ -71,7 +71,10 @@ Tick each item in **both English and Urdu**, and in **light and dark** mode (Set
 
 ## Budget
 - [ ] Bank setup asks only for the bank name and optional last 4 digits (never a password, PIN, OTP or full number).
-- [ ] SMS permission asked only when you tap "Allow reading SMS", with a reason; deny → statement import / adding by hand still work.
+- [ ] `EasyLife.apk` installs without "App blocked to protect your device" and never asks to read SMS.
+- [ ] Share a bank SMS from the Messages app to Easy Life → Budget → Transactions opens with "1 added"; a non-bank message still opens in Urdu Helper; a shared OTP is never added to Budget.
+- [ ] Budget → Banks and wallets → "Add bank messages": paste two SMS with an empty line between them → "2 added"; pasting the same again adds nothing (duplicates).
+- [ ] Only in `EasyLife-with-SMS.apk` (if your phone allows installing it): SMS permission asked only when you tap "Allow reading SMS", with a reason; deny → paste, share and statement import still work.
 - [ ] SMS Lab: an OTP message shows "DISCARD"; it never appears in Transactions.
 - [ ] Transactions: exclude one → monthly total drops; Undo restores it. "Exclude similar…" offers a rule.
 - [ ] Money sent to yourself and back is suggested as a self-transfer pair; a refund is paired with its purchase.

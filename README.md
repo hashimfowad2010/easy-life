@@ -34,6 +34,8 @@ Everything starts with **Universal Scan** (one camera button) and a shared **Lim
 
 Android 8.0 or newer. The download is about 30 MB (about 60 MB once installed). The Urdu translation model (about 30 MB) is downloaded once, on Wi-Fi, when you first need it.
 
+**Which APK?** Use **`EasyLife.apk`**. It does not ask to read SMS or notifications, because Google Play Protect blocks apps installed from the internet that do ("App blocked to protect your device"). Bank SMS go into Budget by **sharing** them (long-press the message → Share → Easy Life) or **pasting** them (Budget → Banks and wallets → "Add bank messages"). `EasyLife-with-SMS.apk` is the same app plus automatic SMS reading, for phones where Play Protect allows it.
+
 ## Privacy, in plain words
 
 - **No bank passwords, PINs, OTPs, CVVs, full card or account numbers, or IBANs. Ever.** Only a bank's name and, if you want, the last 4 digits.
@@ -170,14 +172,14 @@ It writes `impact-by-pilot.csv` (events per pilot code, number of phones), `feed
 - On-device parsers were built and tested on **fictional** bills and SMS. Real bills vary; Parser Lab (Settings → tap version 7 times) is there to tune them with real samples kept off GitHub (see [test-data.README.md](test-data.README.md)).
 - Meter photos need good light; low-confidence digits are always highlighted for the user to check.
 - Bill estimates use published slab rates plus typical taxes and are labelled "Estimated" with the tariff date; the real bill can differ.
-- Reading SMS needs the SMS permission, which Google Play allows only for default SMS apps. This APK is installed directly; a Play Store version would use notification access or statement import instead (both already in the app).
+- **Automatic SMS reading is not in the main APK.** Google Play Protect blocks internet-installed apps that ask to read SMS or notifications, and Google Play allows SMS access only for default SMS apps. So `EasyLife.apk` takes bank SMS by share or paste (or statement import); `EasyLife-with-SMS.apk` reads them automatically where the phone allows it.
 - Community prices are only as good as the receipts people share; outliers are removed with a robust median filter. There is no automatic online price search on the free plan: Google's terms don't allow storing or editing search-grounded answers, so online prices come from the retailer search buttons.
 - The free Gemini quota is shared by every phone in the Firebase project. When it runs out (it resets daily) or there is no internet, Smart AI quietly falls back to reading on the phone.
 - Urdu text-to-speech needs an Urdu voice on the phone; the app explains how to install one and falls back to showing text.
 
 ## Scaling plan
 
-1. **Play Store:** switch SMS reading to notification access and PDF/CSV statement import (built), keep the direct APK for pilots.
+1. **Play Store:** publish the standard build (share/paste and statement import, no SMS permission) with a verified developer account; keep the direct APKs for pilots.
 2. **Open banking:** when Pakistan's open-banking framework goes live, add read-only bank connections with the same on-phone storage.
 3. **More cities and retailers:** retailer list, search URLs and city list come from Remote Config; community prices grow with every shared receipt.
 4. **Tariff updates:** NEPRA changes go out through Remote Config the same day, with the date shown in the app.

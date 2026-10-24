@@ -6,6 +6,8 @@
     <!-- Budget: bank/wallet SMS alerts (asked just-in-time in Bank setup). -->
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
+    <!-- Tablets and Chromebooks without a SIM can still install it. -->
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <application>
         <!-- New bank SMS are read on the phone the moment they arrive (allow-listed senders only). -->
