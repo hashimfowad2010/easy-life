@@ -10,7 +10,8 @@
     "bundle": "node scripts/bundle-prompts.mjs",
     "build": "npm run bundle && tsc -p tsconfig.json",
     "test": "npm run bundle && vitest run",
-    "cost": "node scripts/cost-estimate.mjs"
+    "cost": "node scripts/cost-estimate.mjs",
+    "test:rules": "vitest run --config vitest.rules.config.mts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "0.133.0",
@@ -18,7 +19,9 @@
     "firebase-functions": "7.4.0"
   },
   "devDependencies": {
+    "@firebase/rules-unit-testing": "5.0.2",
     "@types/node": "22.20.5",
+    "firebase": "12.19.0",
     "typescript": "5.9.3",
     "vitest": "5.0.3"
   }

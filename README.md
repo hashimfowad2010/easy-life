@@ -86,7 +86,7 @@ Code map: see [CLAUDE.md](CLAUDE.md) (conventions) and [PLAN.md](PLAN.md) (decis
 
 There is no local build step: GitHub Actions builds everything.
 
-- **CI** (`.github/workflows/ci.yml`, every push): Android unit tests, debug APK, lint; Cloud Functions build + tests; Remote Config template check.
+- **CI** (`.github/workflows/ci.yml`, every push): Android unit tests, debug APK, lint; Cloud Functions build + tests; Firestore security rules tested on the Firestore emulator; Remote Config template check.
 - **Emulator smoke test** (`smoke.yml`): installs the app on an Android 14 emulator and walks every main screen in English and Urdu, saving screenshots.
 - **Release** (`release.yml`): push a tag `vA.B.C` and CI builds a signed APK, verifies the signature, and publishes a GitHub Release with `EasyLife.apk` and notes from `release-notes/vA.B.C.md`.
 - **Deploy Firebase** (`deploy-firebase.yml`, manual): Firestore rules, Remote Config, or (after funding) Cloud Functions.

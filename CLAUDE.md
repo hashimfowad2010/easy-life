@@ -36,6 +36,7 @@ com.easylife.app
 - Never commit secrets: no keystore, passwords, `google-services.json`, real bills/SMS. `test-data/` is gitignored.
 - Don't write raw invisible Unicode in source; use `Char(0x2066)` style.
 - Kotlin block comments nest: never write `/*` inside a KDoc (e.g. a glob like `*.json`).
+- Database: `app/schemas` is committed and CI fails if it changes. Any entity change = bump `AppDatabase.version` + a migration (prefer `AutoMigration`) so installed phones keep their data. Never use destructive fallback.
 
 ## Tests
 - Pure logic lives in `core/limits`, `core/parse`, `core/ai` and is unit-tested in `app/src/test`.

@@ -197,13 +197,18 @@ class SmokeTest {
             waitText("بجلی گارڈ", 30_000)
             shot("ur-large-01-today")
             click("بجلی گارڈ")
-            waitText("روزانہ کی حد")
+            // At 2x font the stat tiles are below the fold (not composed yet): wait for the top bar's back button.
+            compose.waitUntil(20_000) { compose.onAllNodesWithContentDescription("واپس").fetchSemanticsNodes().isNotEmpty() }
             shot("ur-large-02-bijli-guard")
             back()
             click("سیٹنگز")
             waitText("زبان")
             shot("ur-large-03-settings")
             scenario?.close()
+        } catch (e: Throwable) {
+            // Evidence at the large font, before it is reset below.
+            shot("zz-failure-large-font")
+            throw e
         } finally {
             setFontScale(1.0f)
         }

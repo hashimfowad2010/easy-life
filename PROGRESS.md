@@ -35,13 +35,16 @@ Done:
 - Demo mode (fictional family: bill history crossing 200 in July, readings, transactions with an exclusion, saved shopping list, translated circular).
 - **Cloud Functions** `ai` and `shopSearch` (TypeScript, Claude Haiku 5.5 / Sonnet 5.5, structured JSON output, server-side masking, per-user and daily limits, monthly USD budget, web search limited to the retailer allowlist, shared 24 h price cache). 25 tests with a fake Anthropic client run in CI. **Not deployed.**
 - "Check prices online (Smart AI)" in Smart Shopping, shown only when Claude is switched on: results labelled Smart AI (Claude), dated, linked to the shop's page, used only after "Use this price".
+- Room schema committed; CI fails on any schema change without a version bump and migration.
+- Bottom bar at 200 % font: labels capped at 1.3x so icons are never cut off; smoke test now also walks Today, Bijli Guard and Settings at 2x font in Urdu.
+- Firestore security rules tested on the emulator in CI (signed-out users blocked, create-only collections, no financial data, server-only collections closed).
 - Remote Config template generated from the app's bundled defaults (CI checks it stays in sync); manual "Deploy Firebase" workflow.
+- Script to combine pilot results from all phones into CSVs (run locally, never in public CI).
 - Emulator smoke test with screenshots in English and Urdu.
 - README with architecture diagram, privacy, limitations, "Switching on Smart AI (Claude)" and cost table, scaling plan.
 
 Not done yet:
 - Accessibility pass (TalkBack labels on every icon button, 200 % font scale check on every screen).
-- Committing the Room schema and switching to real migrations from v1.0.
 - v1.0.0 release.
 
 ## Known issues

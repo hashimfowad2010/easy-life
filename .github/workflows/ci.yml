@@ -41,6 +41,14 @@ jobs:
       - name: Build, test, lint
         run: ./gradlew --stacktrace testDebugUnitTest assembleDebug lintDebug
 
+      - name: Database schema unchanged (or bumped with a migration)
+        run: |
+          if [ -n "$(git status --porcelain -- app/schemas)" ]; then
+            git status --porcelain -- app/schemas
+            echo "::error::The Room schema changed. Bump AppDatabase.version, add a migration (AutoMigration or Migration) so phones keep their data, and commit app/schemas."
+            exit 1
+          fi
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v7
         with:
@@ -84,3 +92,12 @@ jobs:
       - name: Remote Config template matches the app's bundled defaults
         if: steps.check.outputs.present == 'true'
         run: node firebase/scripts/build-remoteconfig.mjs --check
+      - uses: actions/setup-java@v6
+        if: steps.check.outputs.present == 'true'
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Firestore security rules on the emulator
+        if: steps.check.outputs.present == 'true'
+        working-directory: firebase
+        run: npx --yes firebase-tools@15.33.0 emulators:exec --only firestore --project demo-easylife "npm --prefix functions run test:rules"
