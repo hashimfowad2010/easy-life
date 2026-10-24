@@ -63,6 +63,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Real phones only: x86/x86_64 code is for emulators and would add about 60 MB. Both ARM ABIs stay,
+            // because many budget Android Go phones run 32-bit (armeabi-v7a) only.
+            ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a") }
             signingConfig = if (releaseKeystorePath != null) {
                 signingConfigs.getByName("release")
             } else {
@@ -89,6 +92,10 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+        // Compressed native libraries: a much smaller download on mobile data; only the phone's own ABI is unpacked.
+        jniLibs {
+            useLegacyPackaging = true
         }
     }
 
