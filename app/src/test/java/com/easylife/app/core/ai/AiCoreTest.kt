@@ -232,4 +232,47 @@ class AiRouterTest {
         assertEquals(ProviderId.MOCK, r.source)
         assertEquals(Provenance.DEMO, r.provenance)
     }
+
+    @Test
+    fun freeTierGeminiNeverSeesNamesAddressesOrIds() = runTest {
+        val gemini = FakeProvider(ProviderId.GEMINI_FREE)
+        val device = FakeProvider(ProviderId.ON_DEVICE)
+        val text = "NAME & ADDRESS: Sample Person\nHouse 12 Street 4 Model Town\nCNIC 35202-1234567-1\nUnits 186"
+        val settings = allCloudOn.copy(routing = mapOf("classify_image" to listOf("gemini_free", "on_device")))
+        router(settings, gemini, device).run(AiTask.ClassifyImage, AiInput(text = text, params = mapOf("note" to "S/O Someone")))
+        val sent = gemini.calls.single().second
+        assertFalse("Sample Person" in sent.text!!)
+        assertFalse("Model Town" in sent.text!!)
+        assertFalse("35202" in sent.text!!)
+        assertTrue("Units 186" in sent.text!!)
+        assertFalse("Someone" in sent.params.getValue("note"))
+    }
+
+    @Test
+    fun paidTierKeepsNamesButHidesIds() = runTest {
+        val claude = FakeProvider(ProviderId.CLAUDE)
+        val device = FakeProvider(ProviderId.ON_DEVICE)
+        router(allCloudOn, claude, device).run(AiTask.ClassifyImage, AiInput(text = "NAME: Sample Person\nCNIC 35202-1234567-1"))
+        val sent = claude.calls.single().second.text!!
+        assertTrue("Sample Person" in sent)
+        assertFalse("35202" in sent)
+    }
+}
+
+class PersonalLinesTest {
+    @Test
+    fun addressLabelCoversTheNextTwoLinesButStopsAtBillFields() {
+        val lines = listOf("LESCO", "NAME & ADDRESS", "Sample Person", "House 12 Street 4", "UNITS CONSUMED 186", "DUE DATE 24-OCT-26")
+        assertEquals(setOf(2, 3), Masker.personalLines(lines))
+    }
+
+    @Test
+    fun labelAloneHidesTheLineBelowOnly() {
+        assertEquals(setOf(1), Masker.personalLines(listOf("Consumer Name", "Sample Person", "Tariff A-1a")))
+    }
+
+    @Test
+    fun priceTagsAndBillFieldsAreNotPersonal() {
+        assertEquals(emptySet(), Masker.personalLines(listOf("MRP 250", "Units 186", "Amount payable 6407")))
+    }
 }

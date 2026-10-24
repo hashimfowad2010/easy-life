@@ -33,23 +33,53 @@ object Masker {
     fun forCloud(text: String): Result = maskIds(text)
 
     /**
-     * Stronger masking for "Copy masked OCR text" in Parser Lab: also hides names and addresses that follow
-     * typical labels (NAME, ADDRESS, S/O, D/O, W/O, Mr, Mrs, Consumer Name).
+     * Stronger masking: also hides names and addresses that follow typical labels (NAME, ADDRESS, S/O, D/O, W/O,
+     * Mr, Mrs, Consumer Name), including address lines below the label. Used for "Copy masked OCR text" in
+     * Parser Lab and for the free Gemini tier, where Google asks apps not to send personal information.
      */
     fun forSharing(text: String): Result {
-        var count = 0
-        val lines = text.lines().map { line ->
+        val lines = text.lines()
+        val personal = personalLines(lines)
+        val masked = lines.mapIndexed { i, line ->
+            if (i !in personal) return@mapIndexed line
             val m = nameLabel.find(line)
-            if (m != null && line.substring(m.range.last + 1).isNotBlank()) {
-                count++
-                line.substring(0, m.range.last + 1) + " " + MASK
-            } else {
-                line
+            if (m != null) line.substring(0, m.range.last + 1) + " " + MASK else MASK
+        }
+        val ids = maskIds(masked.joinToString("\n"))
+        return Result(ids.text, ids.maskedCount + personal.size)
+    }
+
+    /** What the free cloud tier (Gemini) may see: identifiers, names and addresses hidden. */
+    fun forFreeTier(text: String): Result = forSharing(text)
+
+    /**
+     * Indexes of lines that hold a name or address: a label line with its value, the line below a label that
+     * stands alone, and up to two more lines after an ADDRESS label. Bill fields (units, due date, amount…) stop it.
+     */
+    fun personalLines(lines: List<String>): Set<Int> {
+        val out = mutableSetOf<Int>()
+        lines.forEachIndexed { i, line ->
+            val m = nameLabel.find(line) ?: return@forEachIndexed
+            val rest = line.substring(m.range.last + 1)
+            if (rest.isNotBlank()) out += i
+            val follow = when {
+                m.value.contains("address", ignoreCase = true) -> 2
+                rest.isBlank() -> 1
+                else -> 0
+            }
+            for (j in i + 1..minOf(i + follow, lines.lastIndex)) {
+                val next = lines[j]
+                if (next.isBlank() || billField.containsMatchIn(next) || nameLabel.find(next) != null) break
+                out += j
             }
         }
-        val ids = maskIds(lines.joinToString("\n"))
-        return Result(ids.text, ids.maskedCount + count)
+        return out
     }
+
+    private val billField = Regex(
+        """^\s*(?:units?|reading|prev(?:ious)?|present|due|amount|bill(?:ing)?|month|date|issue|tariff|load|meter|payable|arrears|tax|gst|consumer\s*id|ref(?:erence)?|mrp|total|rs\.?|pkr)\b""",
+        RegexOption.IGNORE_CASE,
+    )
 
     private val nameLabel = Regex(
         // The lookahead stops "MRP 250" (a price tag) from being read as "Mr".

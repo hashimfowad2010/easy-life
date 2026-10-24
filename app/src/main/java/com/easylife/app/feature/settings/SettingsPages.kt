@@ -28,11 +28,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
+import com.easylife.app.core.ai.providers.DailyUsage
+import com.easylife.app.core.cloud.FirebaseGateway
 import com.easylife.app.core.cloud.RemoteConfigRepository
 import com.easylife.app.core.data.prefs.PrefsRepository
 import com.easylife.app.core.designsystem.BannerKind
 import com.easylife.app.core.designsystem.BigButton
-import com.easylife.app.core.designsystem.BigOutlinedButton
 import com.easylife.app.core.designsystem.EasyCard
 import com.easylife.app.core.designsystem.EasyTopBar
 import com.easylife.app.core.designsystem.InfoBanner
@@ -47,7 +48,9 @@ import com.easylife.app.core.i18n.currentLanguage
 import com.easylife.app.core.i18n.t
 import com.easylife.app.core.notify.Notifier
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -55,9 +58,24 @@ import java.time.ZoneId
 import javax.inject.Inject
 
 @HiltViewModel
-class SmartAiViewModel @Inject constructor(private val prefs: PrefsRepository, config: RemoteConfigRepository) : ViewModel() {
+class SmartAiViewModel @Inject constructor(
+    private val prefs: PrefsRepository,
+    config: RemoteConfigRepository,
+    firebase: FirebaseGateway,
+    usage: DailyUsage,
+) : ViewModel() {
     val state = combine(prefs.prefs, config.config) { p, c -> p to c }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
+
+    /** Smart AI (Gemini via Firebase) can only work in a build that has the Firebase setup. */
+    val firebaseReady: Boolean = firebase.isConfigured
+
+    private val _usedToday = MutableStateFlow(0)
+    val usedToday = _usedToday.asStateFlow()
+
+    init {
+        viewModelScope.launch { _usedToday.value = usage.usedToday() }
+    }
 
     fun setSmartAi(on: Boolean) = viewModelScope.launch { prefs.setSmartAiEnabled(on) }
 
@@ -98,6 +116,8 @@ fun SmartAiScreen(onBack: () -> Unit, vm: SmartAiViewModel = hiltViewModel()) {
 
             if (!c.geminiEnabled && !c.claudeEnabled) {
                 InfoBanner(SAiConsent.notAvailableYet.t(), BannerKind.INFO, icon = Icons.Rounded.AutoAwesome)
+            } else if (!vm.firebaseReady) {
+                InfoBanner(SAiConsent.needsSetup.t(), BannerKind.INFO, icon = Icons.Rounded.AutoAwesome)
             }
             if (c.claudeEnabled) {
                 EasyCard {
@@ -116,13 +136,16 @@ fun SmartAiScreen(onBack: () -> Unit, vm: SmartAiViewModel = hiltViewModel()) {
             if (c.geminiEnabled) {
                 EasyCard {
                     Text(SAiConsent.geminiTitle.t(), style = MaterialTheme.typography.titleMedium)
-                    Text(SAiConsent.geminiBody.t(), style = MaterialTheme.typography.bodyMedium)
+                    Text(SAiConsent.geminiBody.t(c.geminiDailyLimit), style = MaterialTheme.typography.bodyMedium)
                     Spacer(Modifier.height(8.dp))
                     val at = p.geminiConsentAt
                     if (at == null) {
-                        BigOutlinedButton(SAiConsent.agree.t(), onClick = { vm.consentGemini(true) })
+                        // Google's terms: Gemini API apps are for adults, so the user confirms their age.
+                        BigButton(SAiConsent.agreeAdult.t(), enabled = vm.firebaseReady, onClick = { vm.consentGemini(true) })
                     } else {
+                        val used by vm.usedToday.collectAsStateWithLifecycle()
                         Text(SAiConsent.consentGiven.t(Fmt.date(at.atZone(ZoneId.systemDefault()).toLocalDate(), lang)), style = MaterialTheme.typography.bodySmall)
+                        Text(SAiConsent.usedToday.t(used, c.geminiDailyLimit), style = MaterialTheme.typography.bodySmall)
                         TextButton(onClick = { vm.consentGemini(false) }) { Text(SAiConsent.withdraw.t()) }
                     }
                 }

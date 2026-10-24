@@ -93,6 +93,8 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
         val feedbackDone = booleanPreferencesKey("feedback_done")
         val feedbackSnoozed = longPreferencesKey("feedback_snoozed_at")
         val pendingFeedback = stringPreferencesKey("pending_feedback")
+        val geminiDay = stringPreferencesKey("gemini_day")
+        val geminiCount = intPreferencesKey("gemini_count")
         val smsSetup = booleanPreferencesKey("sms_setup_done")
         val notifListener = booleanPreferencesKey("notification_listener")
         val keepRawSms = booleanPreferencesKey("keep_raw_sms")
@@ -185,6 +187,14 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
     /** Feedback written while offline (or before Firebase is connected), sent later by the upload worker. */
     suspend fun pendingFeedback(): String? = context.dataStore.data.first()[K.pendingFeedback]
     suspend fun setPendingFeedback(json: String?) = context.dataStore.edit { if (json == null) it.remove(K.pendingFeedback) else it[K.pendingFeedback] = json }
+
+    /** Smart AI (Gemini) calls made on this phone on [day] (ISO date). */
+    suspend fun geminiCallsOn(day: String): Int = context.dataStore.data.first().let { if (it[K.geminiDay] == day) it[K.geminiCount] ?: 0 else 0 }
+
+    suspend fun countGeminiCall(day: String) = context.dataStore.edit {
+        it[K.geminiCount] = if (it[K.geminiDay] == day) (it[K.geminiCount] ?: 0) + 1 else 1
+        it[K.geminiDay] = day
+    }
     suspend fun setSmsSetupDone(v: Boolean) = context.dataStore.edit { it[K.smsSetup] = v }
     suspend fun setNotificationListenerEnabled(v: Boolean) = context.dataStore.edit { it[K.notifListener] = v }
     suspend fun setKeepRawSms(v: Boolean) = context.dataStore.edit { it[K.keepRawSms] = v }

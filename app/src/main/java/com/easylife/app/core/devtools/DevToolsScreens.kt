@@ -299,7 +299,7 @@ fun RouterViewScreen(onBack: () -> Unit, vm: RouterViewViewModel = hiltViewModel
     val cfg by vm.config.config.collectAsStateWithLifecycle()
     Scaffold(topBar = { EasyTopBar(SDev.routerView.t(), onBack = onBack) }) { padding ->
         Column(Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()).padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text("${SDev.configSource.t()}: ${cfg.source} · gemini_enabled=${cfg.geminiEnabled} (${cfg.geminiModel}) · claude_enabled=${cfg.claudeEnabled} · prompts ${cfg.prompts.version}", style = MaterialTheme.typography.bodySmall)
+            Text("${SDev.configSource.t()}: ${cfg.source} · gemini_enabled=${cfg.geminiEnabled} (${cfg.geminiModel}, ${cfg.geminiDailyLimit}/day) · claude_enabled=${cfg.claudeEnabled} · prompts ${cfg.prompts.version}", style = MaterialTheme.typography.bodySmall)
             if (cfg.invalidKeys.isNotEmpty()) InfoBanner("Invalid remote keys (using defaults): ${cfg.invalidKeys}")
             AssistChip(onClick = { vm.refreshConfig() }, label = { Text(SDev.refreshConfig.t()) })
             plans.forEach { plan ->

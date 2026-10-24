@@ -3,12 +3,14 @@ package com.easylife.app.core.ai
 import com.easylife.app.core.ai.providers.ClaudeProvider
 import com.easylife.app.core.ai.providers.CloudAiClient
 import com.easylife.app.core.ai.providers.CloudStatus
+import com.easylife.app.core.ai.providers.DailyUsage
 import com.easylife.app.core.ai.providers.FirebaseCloudStatus
 import com.easylife.app.core.ai.providers.FunctionsCloudAiClient
 import com.easylife.app.core.ai.providers.GeminiFreeProvider
 import com.easylife.app.core.ai.providers.ImageEncoder
 import com.easylife.app.core.ai.providers.MockProvider
 import com.easylife.app.core.ai.providers.OnDeviceProvider
+import com.easylife.app.core.ai.providers.PrefsDailyUsage
 import com.easylife.app.core.ai.providers.RedactingImageEncoder
 import com.easylife.app.core.cloud.RemoteConfigRepository
 import com.easylife.app.core.data.prefs.PrefsRepository
@@ -57,6 +59,8 @@ abstract class AiBindings {
     @Binds abstract fun imageEncoder(impl: RedactingImageEncoder): ImageEncoder
 
     @Binds abstract fun settingsSource(impl: AiSettingsRepository): AiSettingsSource
+
+    @Binds abstract fun dailyUsage(impl: PrefsDailyUsage): DailyUsage
 }
 
 @Module

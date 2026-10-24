@@ -1,5 +1,6 @@
 {
-  "gemini_enabled": "false",
+  "gemini_enabled": "true",
   "gemini_model": "gemini-3.8-flash",
+  "gemini_daily_limit": "15",
   "claude_enabled": "false"
 }

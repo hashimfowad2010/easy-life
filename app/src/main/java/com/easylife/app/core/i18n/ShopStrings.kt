@@ -30,7 +30,6 @@ object SShop {
     val priceFor = Txt("Price you found for %1\$s", "%1\$s کی قیمت جو آپ کو ملی")
     val packSize = Txt("Pack size", "پیک کا سائز")
     val where = Txt("Where", "کہاں")
-    val autoSearch = Txt("Search all stores automatically", "سب دکانوں میں خود تلاش کریں")
     val share = Txt("Share list", "فہرست شیئر کریں")
     val shareUrdu = Txt("Share in Urdu", "اردو میں شیئر کریں")
     val shareEnglish = Txt("Share in English", "انگریزی میں شیئر کریں")
@@ -72,7 +71,7 @@ object SShop {
     val consentNo = Txt("No, keep on my phone", "نہیں، صرف میرے فون پر")
     val pricesSaved = Txt("%1\$s prices saved", "%1\$s قیمتیں محفوظ")
 
-    // Online prices through Smart AI (Cloud Function shopSearch, after funding)
+    // Online prices through the optional paid Claude setup (Cloud Function shopSearch, needs the Blaze plan)
     val onlineCheck = Txt("Check prices online (Smart AI)", "آن لائن قیمتیں دیکھیں (سمارٹ AI)")
     val onlineTitle = Txt("Online prices", "آن لائن قیمتیں")
     val onlineChecking = Txt("Searching the shops' own websites… this can take a minute.", "دکانوں کی اپنی ویب سائٹس پر تلاش ہو رہی ہے… ایک منٹ لگ سکتا ہے۔")

@@ -31,7 +31,7 @@ com.easylife.app
 - Numbers: always Western digits via `Fmt`. In Urdu text, wrap numeric runs with `Fmt.ltr(..., lang)`.
 - Every AI result shows its `Provenance` (`SourceChip`). Demo rows have `isDemo = true` and show `DemoChip`.
 - Every extracted number goes through a confirm screen; uncertain fields are highlighted (`ConfirmField(uncertain = true)`).
-- Text is masked (`Masker.forCloud`) before any cloud call; images are redacted (`CloudImagePreparer`). SMS/budget tasks are `sensitive` and never go to `GEMINI_FREE` (router-enforced and tested).
+- Text is masked (`Masker.forCloud`; the free Gemini tier gets `Masker.forFreeTier`, which also hides names and addresses) before any cloud call; images are redacted (`CloudImagePreparer`, `hidePersonal` for Gemini). SMS/budget tasks are `sensitive` and never go to `GEMINI_FREE` (router-enforced and tested).
 - Permissions are requested just-in-time with a reason; every flow has a "type it instead" path.
 - Never commit secrets: no keystore, passwords, `google-services.json`, real bills/SMS. `test-data/` is gitignored.
 - Don't write raw invisible Unicode in source; use `Char(0x2066)` style.
@@ -43,5 +43,5 @@ com.easylife.app
 - Fixtures (all fictional) in `app/src/test/resources/fixtures/`. Demo samples (copies) in `app/src/main/assets/demo/`.
 
 ## Remote Config keys (bundled defaults in `app/src/main/assets/config/` and `assets/ai/prompts.json`)
-`tariffs`, `ai_routing`, `gemini_enabled` (false), `gemini_model`, `claude_enabled` (false), `claude_models`, `ai_prompts`, `retailers`, `feature_flags`.
+`tariffs`, `ai_routing`, `gemini_enabled` (true: Smart AI = Gemini free tier via Firebase AI Logic, users opt in, 18+), `gemini_model`, `gemini_daily_limit` (per phone), `claude_enabled` (false: optional paid path, needs Blaze), `claude_models`, `ai_prompts`, `retailers`, `feature_flags`.
 Prompts live in `/ai-prompts` and are bundled by the Gradle task `bundleAiPrompts`.

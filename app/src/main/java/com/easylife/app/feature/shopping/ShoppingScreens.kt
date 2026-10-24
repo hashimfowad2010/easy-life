@@ -79,12 +79,10 @@ import com.easylife.app.core.designsystem.LabeledValue
 import com.easylife.app.core.designsystem.LoadingBox
 import com.easylife.app.core.designsystem.Pill
 import com.easylife.app.core.designsystem.SectionHeader
-import com.easylife.app.core.designsystem.SmartAiChip
 import com.easylife.app.core.designsystem.SourceChip
 import com.easylife.app.core.i18n.AppLanguage
 import com.easylife.app.core.i18n.Fmt
 import com.easylife.app.core.i18n.SCommon
-import com.easylife.app.core.i18n.SProvenance
 import com.easylife.app.core.i18n.SShop
 import com.easylife.app.core.i18n.currentLanguage
 import com.easylife.app.core.i18n.t
@@ -267,13 +265,6 @@ fun ShoppingListScreen(id: Long, nav: NavHostController, vm: ShoppingViewModel =
                         val query = listOfNotNull(item.brandPref, item.nameEn.substringBefore(" (")).joinToString(" ")
                         runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(r.searchUrlFor(query))).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
                     }, modifier = Modifier.fillMaxWidth()) { Text(SShop.searchOn.t(r.name)) }
-                }
-                if (!onlineAvailable) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        SmartAiChip()
-                        Spacer(Modifier.width(8.dp))
-                        Text(SShop.autoSearch.t() + " — " + SProvenance.comingWithSmartAi.t(), style = MaterialTheme.typography.bodySmall)
-                    }
                 }
             }
         }

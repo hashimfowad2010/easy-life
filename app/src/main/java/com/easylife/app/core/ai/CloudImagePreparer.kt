@@ -19,6 +19,7 @@ import kotlin.math.max
 /**
  * Prepares photos for a cloud provider (spec rule 4 applied to images):
  * downscale, then black out every OCR word that looks like an account, card, CNIC, IBAN, reference or phone number.
+ * With [prepare]'s `hidePersonal` (the free Gemini tier) name and address lines are blacked out too.
  */
 @Singleton
 class CloudImagePreparer @Inject constructor(
@@ -27,12 +28,19 @@ class CloudImagePreparer @Inject constructor(
 ) {
     data class Prepared(val bitmap: Bitmap, val redactedRegions: Int)
 
-    suspend fun prepare(imageRef: String, maxSide: Int = 1600): Prepared {
+    suspend fun prepare(imageRef: String, maxSide: Int = 1600, hidePersonal: Boolean = false): Prepared {
         val bitmap = decodeSampled(imageRef, maxSide).copy(Bitmap.Config.ARGB_8888, true)
         val doc = ocr.recognize(bitmap)
         val canvas = Canvas(bitmap)
         val paint = Paint().apply { color = Color.BLACK; style = Paint.Style.FILL }
         var count = 0
+        if (hidePersonal) {
+            for (i in Masker.personalLines(doc.lines.map { it.text })) {
+                val b = doc.lines[i].box ?: continue
+                canvas.drawRect(Rect(b.left - 4, b.top - 4, b.right + 4, b.bottom + 4), paint)
+                count++
+            }
+        }
         for (line in doc.lines) {
             if (Masker.forCloud(line.text).maskedCount == 0) continue
             // Prefer word-level boxes; fall back to the whole line.

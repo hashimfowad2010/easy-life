@@ -172,24 +172,30 @@ object SAiConsent {
         "آسان زندگی آپ کے فون پر مفت اور مکمل کام کرتی ہے۔ سمارٹ AI ایک اختیاری آن لائن مددگار ہے جو مشکل تصاویر بہتر پڑھتا ہے اور کاغذات آسان اردو میں سمجھاتا ہے۔",
     )
     val notAvailableYet = Txt(
-        "Smart AI is not switched on yet. It will be added after the project gets funding. Until then everything runs on your phone.",
-        "سمارٹ AI ابھی شروع نہیں ہوا۔ یہ فنڈنگ ملنے کے بعد شامل ہوگا۔ تب تک سب کچھ آپ کے فون پر چلتا ہے۔",
+        "Smart AI is switched off for this app right now. Everything runs on your phone.",
+        "سمارٹ AI اس وقت ایپ کے لیے بند ہے۔ سب کچھ آپ کے فون پر چلتا ہے۔",
+    )
+    val needsSetup = Txt(
+        "Smart AI needs the app's online setup (Firebase), which is not connected in this version yet. Everything still works on your phone.",
+        "سمارٹ AI کے لیے ایپ کا آن لائن سیٹ اپ (Firebase) چاہیے، جو اس ورژن میں ابھی منسلک نہیں۔ باقی سب کچھ فون پر چلتا ہے۔",
     )
     val whatIsSent = Txt("What is sent", "کیا بھیجا جاتا ہے")
     val whatIsSentBody = Txt(
-        "Only the photo or text you choose to process, after your phone hides account, card, CNIC, phone and reference numbers. " +
-            "Bank SMS and budget data are never sent to a free AI service.",
-        "صرف وہ تصویر یا متن جو آپ خود چنیں — اور اس سے پہلے فون اکاؤنٹ، کارڈ، شناختی کارڈ، فون اور ریفرنس نمبر چھپا دیتا ہے۔ " +
-            "بینک SMS اور بجٹ کا ڈیٹا کبھی مفت AI سروس کو نہیں بھیجا جاتا۔",
+        "Only the photo or text you choose to process. First your phone hides account, card, CNIC, phone and reference numbers, names and addresses. " +
+            "Bank SMS and budget data are never sent.",
+        "صرف وہ تصویر یا متن جو آپ خود چنیں۔ اس سے پہلے فون اکاؤنٹ، کارڈ، شناختی کارڈ، فون اور ریفرنس نمبر، نام اور پتے چھپا دیتا ہے۔ " +
+            "بینک SMS اور بجٹ کا ڈیٹا کبھی نہیں بھیجا جاتا۔",
     )
-    val geminiTitle = Txt("Google Gemini (free tier)", "گوگل جیمنائی (مفت)")
+    val geminiTitle = Txt("Google Gemini (free)", "گوگل جیمنائی (مفت)")
     val geminiBody = Txt(
-        "Sent to Google through Firebase. On the free tier Google may use what you send to improve its products, and people at Google may review it. " +
-            "Google's terms also say users must be 18 or older. Don't use it for private papers.",
-        "یہ Firebase کے ذریعے گوگل کو جاتا ہے۔ مفت سروس میں گوگل بھیجی گئی چیزوں کو اپنی مصنوعات بہتر بنانے کے لیے استعمال کر سکتا ہے اور گوگل کے لوگ اسے دیکھ سکتے ہیں۔ " +
-            "گوگل کی شرائط کے مطابق صارف کی عمر 18 سال یا زیادہ ہونی چاہیے۔ نجی کاغذات کے لیے استعمال نہ کریں۔",
+        "Free, through Google Firebase. Google may use what you send to improve its products, and people at Google may read it, so don't use it for private papers. " +
+            "Google's terms say it is for adults (18 or older). Up to %1\$d Smart AI reads a day on this phone.",
+        "مفت، گوگل Firebase کے ذریعے۔ گوگل بھیجی گئی چیزوں کو اپنی مصنوعات بہتر بنانے کے لیے استعمال کر سکتا ہے اور گوگل کے لوگ انہیں پڑھ سکتے ہیں، اس لیے نجی کاغذات کے لیے استعمال نہ کریں۔ " +
+            "گوگل کی شرائط کے مطابق یہ بالغوں (18 سال یا زیادہ) کے لیے ہے۔ اس فون پر روزانہ %1\$d بار تک سمارٹ AI۔",
     )
-    val claudeTitle = Txt("Anthropic Claude (after funding)", "اینتھراپک کلاڈ (فنڈنگ کے بعد)")
+    val agreeAdult = Txt("I am 18 or older. Turn on", "میری عمر 18 سال یا زیادہ ہے۔ آن کریں")
+    val usedToday = Txt("Today on this phone: %1\$d of %2\$d Smart AI reads", "آج اس فون پر: %2\$d میں سے %1\$d بار سمارٹ AI")
+    val claudeTitle = Txt("Anthropic Claude (paid, optional)", "اینتھراپک کلاڈ (ادائیگی والا، اختیاری)")
     val claudeBody = Txt(
         "Sent through Easy Life's own server to Anthropic. The server keeps no copy of what you send. Requires internet.",
         "آسان زندگی کے اپنے سرور کے ذریعے اینتھراپک کو جاتا ہے۔ سرور آپ کی بھیجی ہوئی چیز کی کاپی نہیں رکھتا۔ انٹرنیٹ ضروری ہے۔",

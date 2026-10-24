@@ -9,31 +9,38 @@
     },
     "ai_routing": {
       "defaultValue": {
-        "value": "{\"classify_image\":[\"claude\",\"gemini_free\",\"on_device\"],\"meter_read\":[\"claude\",\"gemini_free\",\"on_device\"],\"bill_extract\":[\"claude\",\"gemini_free\",\"on_device\"],\"receipt_extract\":[\"claude\",\"gemini_free\",\"on_device\"],\"sms_parse\":[\"on_device\",\"claude\"],\"translate\":[\"on_device\",\"claude\",\"gemini_free\"],\"doc_explain\":[\"claude\",\"gemini_free\",\"on_device\"],\"list_normalize\":[\"on_device\",\"claude\",\"gemini_free\"],\"weekly_summary\":[\"claude\",\"gemini_free\",\"on_device\"]}"
+        "value": "{\"classify_image\":[\"on_device\",\"gemini_free\"],\"meter_read\":[\"gemini_free\",\"on_device\"],\"bill_extract\":[\"gemini_free\",\"on_device\"],\"receipt_extract\":[\"gemini_free\",\"on_device\"],\"sms_parse\":[\"on_device\"],\"translate\":[\"on_device\",\"gemini_free\"],\"doc_explain\":[\"gemini_free\",\"on_device\"],\"list_normalize\":[\"on_device\",\"gemini_free\"],\"weekly_summary\":[\"on_device\"]}"
       },
       "valueType": "JSON",
       "description": "Provider order per task: ON_DEVICE first, then GEMINI_FREE or CLAUDE when switched on."
     },
     "gemini_enabled": {
       "defaultValue": {
-        "value": "false"
+        "value": "true"
       },
       "valueType": "BOOLEAN",
-      "description": "Free Gemini tier (never used for SMS/budget data). Off by default."
+      "description": "Smart AI = Google Gemini free tier via Firebase AI Logic (Spark plan). Users still opt in, 18+. Never used for SMS/budget data."
     },
     "gemini_model": {
       "defaultValue": {
         "value": "gemini-3.8-flash"
       },
       "valueType": "STRING",
-      "description": "Gemini model name for Firebase AI Logic."
+      "description": "Gemini model name for Firebase AI Logic (pick one with free-tier quota in AI Studio)."
+    },
+    "gemini_daily_limit": {
+      "defaultValue": {
+        "value": "15"
+      },
+      "valueType": "NUMBER",
+      "description": "Smart AI calls per phone per day; the free quota is shared by every phone in the project."
     },
     "claude_enabled": {
       "defaultValue": {
         "value": "false"
       },
       "valueType": "BOOLEAN",
-      "description": "Smart AI (Claude) through the `ai` Cloud Function. Turn on only after deploying the functions."
+      "description": "Optional paid path: Claude through the `ai` Cloud Function (needs the Blaze plan). Leave false."
     },
     "claude_models": {
       "defaultValue": {

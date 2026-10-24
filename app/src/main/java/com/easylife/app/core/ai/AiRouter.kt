@@ -86,7 +86,7 @@ class AiRouter(
         for (id in candidates) {
             val provider = providers[id] ?: continue
             val started = clock()
-            val prepared = if (id.isCloud) maskForCloud(input) else input
+            val prepared = if (id.isCloud) maskForCloud(input, freeTier = id == ProviderId.GEMINI_FREE) else input
             val result = try {
                 if (id.isCloud) withTimeout(cloudTimeoutMillis) { provider.run(task, prepared) } else provider.run(task, prepared)
             } catch (e: TimeoutCancellationException) {
@@ -117,11 +117,15 @@ class AiRouter(
         return final
     }
 
-    private fun maskForCloud(input: AiInput): AiInput = input.copy(
-        text = input.text?.let { Masker.forCloud(it).text },
-        // OCR text is not sent to cloud providers; images are redacted by the provider using these boxes.
-        params = input.params.mapValues { (_, v) -> Masker.forCloud(v).text },
-    )
+    /** The free tier (Gemini) also gets names and addresses hidden: Google may keep and review free-tier input. */
+    private fun maskForCloud(input: AiInput, freeTier: Boolean): AiInput {
+        val mask: (String) -> String = { if (freeTier) Masker.forFreeTier(it).text else Masker.forCloud(it).text }
+        return input.copy(
+            text = input.text?.let(mask),
+            // OCR text is not sent to cloud providers; images are redacted by the provider using these boxes.
+            params = input.params.mapValues { (_, v) -> mask(v) },
+        )
+    }
 
     companion object {
         const val RATE_LIMIT_COOLDOWN = 10 * 60_000L

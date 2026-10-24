@@ -21,8 +21,8 @@ object SPrivacy {
             "بل، میٹر اور رسید کی تصاویر فون پر پڑھی جاتی ہیں اور نتیجہ محفوظ ہونے کے بعد مٹا دی جاتی ہیں۔",
         ),
         Txt("Smart AI only if you agree", "سمارٹ AI صرف آپ کی اجازت سے") to Txt(
-            "Online Smart AI is off by default. Before it is used, Easy Life explains what is sent and asks you. Account, card, CNIC and phone numbers are hidden on the phone first. Bank SMS and budget data are never sent to a free AI service.",
-            "آن لائن سمارٹ AI شروع میں بند ہے۔ استعمال سے پہلے آسان زندگی بتاتی ہے کہ کیا بھیجا جائے گا اور اجازت مانگتی ہے۔ اکاؤنٹ، کارڈ، شناختی کارڈ اور فون نمبر پہلے ہی چھپا دیے جاتے ہیں۔ بینک SMS اور بجٹ کا ڈیٹا کبھی مفت AI سروس کو نہیں جاتا۔",
+            "Online Smart AI (Google Gemini, free) is off until you turn it on. Before it is used, Easy Life explains what is sent and asks you. Account, card, CNIC and phone numbers, names and addresses are hidden on the phone first. Google may use and review what is sent on its free tier. Bank SMS and budget data are never sent.",
+            "آن لائن سمارٹ AI (گوگل جیمنائی، مفت) تب تک بند رہتا ہے جب تک آپ آن نہ کریں۔ استعمال سے پہلے آسان زندگی بتاتی ہے کہ کیا بھیجا جائے گا اور اجازت مانگتی ہے۔ اکاؤنٹ، کارڈ، شناختی کارڈ اور فون نمبر، نام اور پتے پہلے ہی چھپا دیے جاتے ہیں۔ مفت سروس میں گوگل بھیجی گئی چیزیں استعمال اور دیکھ سکتا ہے۔ بینک SMS اور بجٹ کا ڈیٹا کبھی نہیں بھیجا جاتا۔",
         ),
         Txt("Anonymous counts only with your OK", "صرف اجازت سے گمنام گنتی") to Txt(
             "If you opt in, Easy Life sends anonymous counts (like \"a reminder helped pay on time\") to show the project's impact. No names, numbers, messages or bills. Amounts are rounded. Switch it off any time.",

@@ -11,6 +11,7 @@ import com.easylife.app.core.ai.CloudJson
 import com.easylife.app.core.ai.ProviderId
 import com.easylife.app.core.cloud.FirebaseGateway
 import com.easylife.app.core.cloud.RemoteConfigRepository
+import com.easylife.app.core.data.prefs.PrefsRepository
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
@@ -22,6 +23,7 @@ import com.google.firebase.functions.functions
 import kotlinx.coroutines.tasks.await
 import kotlinx.serialization.Serializable
 import java.io.IOException
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,25 +49,44 @@ class RedactingImageEncoder @Inject constructor(private val preparer: CloudImage
 
 // ------------------------------------------------------------------------------------------------ Gemini (free tier)
 
+/** Smart AI calls per phone per day. The free Gemini quota is shared by every phone in the Firebase project. */
+interface DailyUsage {
+    suspend fun usedToday(): Int
+    suspend fun countOne()
+}
+
+class PrefsDailyUsage @Inject constructor(private val prefs: PrefsRepository) : DailyUsage {
+    override suspend fun usedToday(): Int = prefs.geminiCallsOn(LocalDate.now().toString())
+    override suspend fun countOne() {
+        prefs.countGeminiCall(LocalDate.now().toString())
+    }
+}
+
 /**
- * Optional free provider: Gemini Developer API through Firebase AI Logic (project stays on the free Spark plan).
- * Off by default (Remote Config `gemini_enabled=false`). Never used for SMS/budget data (the router enforces this,
- * and [supports] refuses sensitive tasks too).
+ * Smart AI: Gemini Developer API through Firebase AI Logic, free tier (the project stays on the no-cost Spark plan,
+ * so it can never be billed). Switched on by Remote Config `gemini_enabled` (default true), then by the user in
+ * Settings → Smart AI. Never used for SMS/budget data (the router enforces this, and [supports] refuses sensitive
+ * tasks too). Photos have numbers, names and addresses blacked out first; at most `gemini_daily_limit` calls a day.
  */
 @Singleton
 class GeminiFreeProvider @Inject constructor(
     private val status: CloudStatus,
     private val config: RemoteConfigRepository,
     private val preparer: CloudImagePreparer,
+    private val usage: DailyUsage,
 ) : AiProvider {
     override val id = ProviderId.GEMINI_FREE
 
     override fun supports(task: AiTask<*>): Boolean = !task.sensitive
 
-    override suspend fun isAvailable(task: AiTask<*>): Availability = when {
-        !status.isConfigured -> Availability.no("Firebase not connected in this build")
-        !status.isOnline() -> Availability.no("no internet")
-        else -> Availability.Yes
+    override suspend fun isAvailable(task: AiTask<*>): Availability {
+        val limit = config.current.geminiDailyLimit
+        return when {
+            !status.isConfigured -> Availability.no("Firebase not connected in this build")
+            !status.isOnline() -> Availability.no("no internet")
+            usage.usedToday() >= limit -> Availability.no("today's Smart AI limit on this phone is used ($limit)")
+            else -> Availability.Yes
+        }
     }
 
     override suspend fun <R : Any> run(task: AiTask<R>, input: AiInput): AiResult<R> {
@@ -77,8 +98,10 @@ class GeminiFreeProvider @Inject constructor(
             if (sendImages) null else input.text,
             input.params + ("language" to input.lang.tag),
         ) ?: return AiResult.failure(id, AiError.NotSupported)
+        // Every attempt uses the shared free quota, so it counts even if it fails.
+        usage.countOne()
         return try {
-            val bitmaps = if (sendImages) input.imagePaths.take(3).map { preparer.prepare(it).bitmap } else emptyList()
+            val bitmaps = if (sendImages) input.imagePaths.take(3).map { preparer.prepare(it, hidePersonal = true).bitmap } else emptyList()
             val model = Firebase.ai(backend = GenerativeBackend.googleAI()).generativeModel(
                 modelName = cfg.geminiModel,
                 generationConfig = generationConfig { responseMimeType = "application/json" },

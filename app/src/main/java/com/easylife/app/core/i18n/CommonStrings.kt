@@ -77,8 +77,8 @@ object SProvenance {
     val community = Txt("Community report", "دوسرے صارفین کی رپورٹ")
     val smartAiBadge = Txt("Smart AI", "سمارٹ AI")
     val comingWithSmartAi = Txt(
-        "Coming with Smart AI (after funding). Works better, explains in simple Urdu.",
-        "سمارٹ AI کے ساتھ آئے گا (فنڈنگ کے بعد)۔ بہتر نتیجہ اور آسان اردو۔",
+        "Needs Smart AI: turn it on in Settings → Smart AI (free, needs internet). Explains in simple Urdu.",
+        "سمارٹ AI چاہیے: سیٹنگز ← سمارٹ AI میں آن کریں (مفت، انٹرنیٹ ضروری)۔ آسان اردو میں سمجھاتا ہے۔",
     )
 }
 

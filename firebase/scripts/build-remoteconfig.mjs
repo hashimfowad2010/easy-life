@@ -18,9 +18,10 @@ const scalars = JSON.parse(readFileSync(join(config, "scalars.json"), "utf8"));
 const params = {
   tariffs: [json("tariffs.json"), "JSON", "Electricity slab rates, fixed charges and taxes (with the date they were checked)."],
   ai_routing: [json("ai_routing.json"), "JSON", "Provider order per task: ON_DEVICE first, then GEMINI_FREE or CLAUDE when switched on."],
-  gemini_enabled: [scalars.gemini_enabled, "BOOLEAN", "Free Gemini tier (never used for SMS/budget data). Off by default."],
-  gemini_model: [scalars.gemini_model, "STRING", "Gemini model name for Firebase AI Logic."],
-  claude_enabled: [scalars.claude_enabled, "BOOLEAN", "Smart AI (Claude) through the `ai` Cloud Function. Turn on only after deploying the functions."],
+  gemini_enabled: [scalars.gemini_enabled, "BOOLEAN", "Smart AI = Google Gemini free tier via Firebase AI Logic (Spark plan). Users still opt in, 18+. Never used for SMS/budget data."],
+  gemini_model: [scalars.gemini_model, "STRING", "Gemini model name for Firebase AI Logic (pick one with free-tier quota in AI Studio)."],
+  gemini_daily_limit: [scalars.gemini_daily_limit, "NUMBER", "Smart AI calls per phone per day; the free quota is shared by every phone in the project."],
+  claude_enabled: [scalars.claude_enabled, "BOOLEAN", "Optional paid path: Claude through the `ai` Cloud Function (needs the Blaze plan). Leave false."],
   claude_models: [json("claude_models.json"), "JSON", "Claude model per task (Haiku 5.5 for quick tasks, Sonnet 5.5 for photos and explanations)."],
   ai_prompts: [JSON.stringify(buildPromptBundle(repo)), "JSON", "Cloud AI prompts and JSON schemas (generated from /ai-prompts)."],
   retailers: [json("retailers.json"), "JSON", "Retailer names, search URL patterns and allowed domains for price search."],
