@@ -49,7 +49,7 @@ jobs:
           EASYLIFE_KEYSTORE_PASSWORD: ${{ secrets.EASYLIFE_KEYSTORE_PASSWORD }}
           EASYLIFE_KEY_ALIAS: ${{ secrets.EASYLIFE_KEY_ALIAS }}
           EASYLIFE_KEY_PASSWORD: ${{ secrets.EASYLIFE_KEY_PASSWORD }}
-        run: ./gradlew --stacktrace testReleaseUnitTest assembleRelease
+        run: ./gradlew --stacktrace testDebugUnitTest assembleRelease
 
       - name: Verify signature and name the APK
         run: |
