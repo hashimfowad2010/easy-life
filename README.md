@@ -93,6 +93,16 @@ There is no local build step: GitHub Actions builds everything.
 
 Firebase is optional for building: without the `GOOGLE_SERVICES_JSON` secret the app builds with online features off and says so in Settings.
 
+### Connecting Firebase (free Spark plan)
+
+1. [Firebase console](https://console.firebase.google.com) → **Add project** (Google Analytics can stay off).
+2. **Add app → Android**, package `com.easylife.app`; then add a second Android app `com.easylife.app.debug` (CI's debug builds). Download `google-services.json` after adding the second app (it then contains both).
+3. **Authentication → Get started → Sign-in method → Anonymous → Enable.**
+4. **Firestore Database → Create database** (location `asia-south1`, production mode) → **Rules** tab → paste [`firebase/firestore.rules`](firebase/firestore.rules) → **Publish**.
+5. **Crashlytics → Get started.** Remote Config needs nothing: the app ships with defaults, and the deploy workflow uploads [`firebase/remoteconfig.template.json`](firebase/remoteconfig.template.json).
+6. GitHub → **Settings → Secrets and variables → Actions → New repository secret**: `GOOGLE_SERVICES_JSON` = the whole file's text. The next build has online features on.
+7. Optional, for the deploy workflow and pilot results: **Project settings → Service accounts → Generate new private key**, then secrets `FIREBASE_SERVICE_ACCOUNT` (the key file's text) and `FIREBASE_PROJECT_ID`. Keep the key file private; it is git-ignored by name (`service-account*.json`).
+
 ## Switching on Smart AI (Claude)
 
 Everything is built and tested; nothing costs money until these steps are done.

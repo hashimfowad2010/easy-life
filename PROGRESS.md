@@ -44,7 +44,7 @@ Done:
 - README with architecture diagram, privacy, limitations, "Switching on Smart AI (Claude)" and cost table, scaling plan.
 
 Not done yet:
-- Accessibility pass (TalkBack labels on every icon button, 200 % font scale check on every screen).
+- A TalkBack walk-through on a real phone (labels were checked in code and the one unlabelled button fixed; 200 % font is checked by the emulator on Today, Bijli Guard and Settings). See QA.md.
 - v1.0.0 release.
 
 ## Known issues
