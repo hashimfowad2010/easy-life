@@ -1,10 +1,10 @@
 # Progress
 
-**Latest release: [v0.9.2](https://github.com/hashimfowad2010/easy-life/releases/tag/v0.9.2)** (30 MB download, all five modules, free Smart AI with Google Gemini). Earlier: v0.9.1 (smaller download), v0.9.0 (first release, 120 MB).
+**Latest release: [v0.9.3](https://github.com/hashimfowad2010/easy-life/releases/tag/v0.9.3)** (30 MB, all five modules, Firebase connected, free Smart AI with Google Gemini). Earlier: v0.9.2 (Gemini, Firebase off), v0.9.1 (smaller download), v0.9.0 (first release, 120 MB).
 
 Updated: 24 Oct 2026. Every item marked done is in `main`, builds in CI and passes its unit tests. The emulator smoke test walks the main screens in English and Urdu on every push.
 
-**Firebase status:** not connected yet (no `GOOGLE_SERVICES_JSON` secret), so CI builds with online features **off**. The app says so in Settings. Everything that needs Firebase (Smart AI with Gemini, Remote Config updates, anonymous price sharing, impact upload, feedback upload, Crashlytics) is built and switches on automatically once the secret is added and AI Logic is enabled in the console.
+**Firebase status:** connected since v0.9.3 (project `easy-life`, free Spark plan): anonymous sign-in, Firestore with the published rules, AI Logic (Gemini Developer API), Crashlytics. CI and release builds get `google-services.json` from the `GOOGLE_SERVICES_JSON` secret; the emulator smoke test runs without it, so tests never touch the real project.
 
 **Smart AI = Google Gemini, free tier** (Firebase AI Logic on the Spark plan, so nothing can be billed). Users opt in (adults, 18+); photos and explanations go to Gemini, quick tasks stay on the phone, bank SMS and budget data never leave it; numbers, names and addresses are hidden first; 15 Smart AI reads per phone per day. The Claude Cloud Functions remain only as an optional paid path.
 
