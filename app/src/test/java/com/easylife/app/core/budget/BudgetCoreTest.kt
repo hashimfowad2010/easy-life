@@ -6,6 +6,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -137,5 +138,39 @@ class BudgetCoreTest {
         assertEquals(1250.0, rows[1].amount)
         assertTrue(rows[1].debit)
         assertEquals(LocalDate.of(2026, 10, 3), rows[1].date)
+    }
+}
+
+class PastedSmsTest {
+    @Test
+    fun splitsMessagesOnBlankLinesAndDropsFragments() {
+        val text = "PKR 1,250.00 debited from your HBL A/C **1234 at FOODPANDA on 22-10-26.\n\n" +
+            "ok\n\r\n" +
+            "Rs. 5,000 received from SAMPLE PERSON in your JazzCash account. TID 123456789\n   \n" +
+            "Your OTP is 445566. Do not share it."
+        val parts = PastedSms.split(text)
+        assertEquals(3, parts.size)
+        assertTrue(parts[0].startsWith("PKR 1,250.00"))
+        assertTrue(parts[2].startsWith("Your OTP"))
+    }
+
+    @Test
+    fun findsTheBankNamedInTheText() {
+        assertEquals("HBL", BankCatalog.bankInText("PKR 500 debited from HBL A/C")?.id)
+        assertEquals("JAZZCASH", BankCatalog.bankInText("Rs 300 sent via Jazz Cash")?.id)
+        assertEquals("JS", BankCatalog.bankInText("Your JS Bank account was credited")?.id)
+        assertEquals("MEEZAN", BankCatalog.bankInText("Meezan Bank: PKR 900 withdrawn at ATM")?.id)
+        // A province name is not a bank, and "SHBL" is not HBL.
+        assertNull(BankCatalog.bankInText("Paid to a shop in Lahore, Punjab"))
+        assertNull(BankCatalog.bankInText("Ref SHBL7 paid"))
+        assertEquals("HBL", PastedSms.senderFor("PKR 500 debited from HBL A/C"))
+        assertEquals("PASTED", PastedSms.senderFor("PKR 500 debited from your account"))
+    }
+
+    @Test
+    fun sharedBankAlertsGoToBudgetOtherTextDoesNot() {
+        assertTrue(PastedSms.isBankAlert("PKR 1,250.00 debited from your HBL A/C **1234 at FOODPANDA on 22-10-26."))
+        assertFalse(PastedSms.isBankAlert("School fee Rs 5,000 is due on 30 Oct. Please pay at the office."))
+        assertFalse(PastedSms.isBankAlert("Your HBL OTP is 445566. Do not share it with anyone."))
     }
 }

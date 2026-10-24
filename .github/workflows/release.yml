@@ -49,20 +49,35 @@ jobs:
           EASYLIFE_KEYSTORE_PASSWORD: ${{ secrets.EASYLIFE_KEYSTORE_PASSWORD }}
           EASYLIFE_KEY_ALIAS: ${{ secrets.EASYLIFE_KEY_ALIAS }}
           EASYLIFE_KEY_PASSWORD: ${{ secrets.EASYLIFE_KEY_PASSWORD }}
-        run: ./gradlew --stacktrace testDebugUnitTest assembleRelease
+        run: ./gradlew --stacktrace testStandardDebugUnitTest assembleStandardRelease assembleWithSmsRelease
 
-      - name: Verify signature and name the APK
+      - name: Verify signatures and name the APKs
         run: |
           BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
-          APK=$(ls app/build/outputs/apk/release/*.apk | head -1)
-          "$BT/apksigner" verify --print-certs "$APK" | tee signature.txt
-          grep -q "CN=Easy Life" signature.txt || { echo "::error::APK is not signed with the Easy Life release key"; exit 1; }
+          verify() {
+            "$BT/apksigner" verify --print-certs "$1" | tee signature.txt
+            grep -q "CN=Easy Life" signature.txt || { echo "::error::$1 is not signed with the Easy Life release key"; exit 1; }
+          }
+          # Main APK: no SMS/notification access, so Google Play Protect lets it install.
+          STD=$(ls app/build/outputs/apk/standard/release/*.apk | head -1)
+          SMS=$(ls app/build/outputs/apk/withSms/release/*.apk | head -1)
+          verify "$STD"
+          verify "$SMS"
+          # The main APK must not ask for the permissions Play Protect blocks.
+          AAPT=$(ls "$BT"/aapt2 2>/dev/null || true)
+          if [ -n "$AAPT" ] && "$AAPT" dump xmltree --file AndroidManifest.xml "$STD" | grep -E "READ_SMS|RECEIVE_SMS|BIND_NOTIFICATION_LISTENER_SERVICE|BIND_ACCESSIBILITY_SERVICE"; then
+            echo "::error::EasyLife.apk asks for a permission that Google Play Protect blocks"; exit 1
+          fi
           OUT="EasyLife-${GITHUB_REF_NAME}.apk"
-          cp "$APK" "$OUT"
-          # Constant name too, so .../releases/latest/download/EasyLife.apk always works (easy to share).
-          cp "$APK" EasyLife.apk
-          sha256sum "$OUT" > "$OUT.sha256"
+          OUT_SMS="EasyLife-with-SMS-${GITHUB_REF_NAME}.apk"
+          cp "$STD" "$OUT"
+          cp "$SMS" "$OUT_SMS"
+          # Constant names too, so .../releases/latest/download/EasyLife.apk always works (easy to share).
+          cp "$STD" EasyLife.apk
+          cp "$SMS" EasyLife-with-SMS.apk
+          sha256sum "$OUT" "$OUT_SMS" > "$OUT.sha256"
           echo "APK_FILE=$OUT" >> "$GITHUB_ENV"
+          echo "APK_SMS_FILE=$OUT_SMS" >> "$GITHUB_ENV"
           echo "APK_SIZE=$(du -h "$OUT" | cut -f1)" >> "$GITHUB_ENV"
 
       - name: Publish GitHub Release
@@ -74,9 +89,11 @@ jobs:
             if [ -f "$NOTES" ]; then cat "$NOTES"; else echo "Release ${GITHUB_REF_NAME}"; fi
             echo
             echo "---"
-            echo "**Install:** download \`${APK_FILE}\` (${APK_SIZE}) on your Android phone, open it, and allow \"Install unknown apps\" for your browser or Files app when asked."
+            echo "**Install:** download \`EasyLife.apk\` (${APK_SIZE}) on your Android phone, open it, and allow \"Install unknown apps\" for your browser or Files app when asked."
+            echo
+            echo "\`EasyLife-with-SMS.apk\` is the same app plus automatic reading of bank SMS. Google Play Protect blocks it on many phones (\"App blocked to protect your device\"); use \`EasyLife.apk\` there and paste or share bank SMS into the app instead."
             echo
             echo "Build: commit \`${GITHUB_SHA::7}\` · Firebase: ${FIREBASE_STATE}"
           } > notes.md
-          gh release create "$GITHUB_REF_NAME" "$APK_FILE" EasyLife.apk "$APK_FILE.sha256" \
+          gh release create "$GITHUB_REF_NAME" "$APK_FILE" EasyLife.apk "$APK_SMS_FILE" EasyLife-with-SMS.apk "$APK_FILE.sha256" \
             --title "Easy Life ${GITHUB_REF_NAME}" --notes-file notes.md --latest

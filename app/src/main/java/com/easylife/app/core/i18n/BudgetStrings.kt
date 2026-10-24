@@ -130,4 +130,28 @@ object SBudget {
         "cheque" to Txt("Cheque", "چیک"), "cash" to Txt("Cash", "نقد"), "other" to Txt("Other", "دیگر"),
     )
     fun channel(key: String): Txt = channelNames[key.lowercase()] ?: channelNames.getValue("other")
+
+    // Main APK: no SMS permission (Google Play Protect blocks sideloaded apps that ask for it), so messages are
+    // pasted or shared in.
+    val setupBodyPaste = Txt(
+        "Add your bank, then paste or share its SMS alerts into Easy Life. No bank passwords, no online banking login. OTP messages are thrown away immediately.",
+        "اپنا بینک شامل کریں، پھر اس کے SMS پیغامات آسان زندگی میں چسپاں کریں یا شیئر کریں۔ نہ بینک پاس ورڈ، نہ آن لائن بینکنگ لاگ ان۔ OTP پیغامات فوراً ضائع کر دیے جاتے ہیں۔",
+    )
+    val pasteTitle = Txt("Add bank messages", "بینک کے پیغامات شامل کریں")
+    val pasteBody = Txt(
+        "In your Messages app, long-press a bank or wallet SMS → Copy, then paste it here. You can paste several at once with an empty line between them. " +
+            "Quicker: long-press the message → Share → Easy Life.",
+        "اپنی میسجز ایپ میں بینک یا والٹ کا SMS دبا کر رکھیں ← کاپی، پھر یہاں چسپاں کریں۔ کئی پیغامات ایک ساتھ بھی، ہر ایک کے درمیان خالی لائن چھوڑ کر۔ " +
+            "آسان طریقہ: پیغام دبا کر رکھیں ← شیئر ← آسان زندگی۔",
+    )
+    val pasteHint = Txt("Paste bank messages here", "بینک کے پیغامات یہاں چسپاں کریں")
+    val pasteAdd = Txt("Add these messages", "یہ پیغامات شامل کریں")
+    val pasteResult = Txt("%1\$d added, %2\$d to check in the review inbox", "%1\$d شامل ہوئے، %2\$d جائزے کے لیے")
+    val pasteNothing = Txt("No bank transactions found in that text.", "اس متن میں کوئی بینک لین دین نہیں ملا۔")
+    val autoReadElsewhere = Txt(
+        "This version doesn't read your SMS by itself: Google Play Protect blocks apps installed from the internet that ask to. " +
+            "Automatic reading is in the separate \"with SMS\" download, for phones where it is allowed.",
+        "یہ ورژن خود SMS نہیں پڑھتا: گوگل پلے پروٹیکٹ انٹرنیٹ سے انسٹال ہونے والی ایسی ایپس روک دیتا ہے۔ " +
+            "خودکار پڑھنا الگ \"with SMS\" ڈاؤن لوڈ میں ہے، ان فونز کے لیے جہاں اس کی اجازت ہو۔",
+    )
 }

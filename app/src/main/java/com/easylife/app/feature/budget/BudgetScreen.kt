@@ -168,7 +168,7 @@ fun BudgetScreen(nav: NavHostController, vm: BudgetViewModel = hiltViewModel()) 
                                 Text(SBudget.setupTitle.t(), style = MaterialTheme.typography.titleLarge, color = EasyTheme.colors.budget.onContainer)
                             }
                             Spacer(Modifier.height(8.dp))
-                            Text(SBudget.setupBody.t(), style = MaterialTheme.typography.bodyMedium, color = EasyTheme.colors.budget.onContainer)
+                            Text(if (com.easylife.app.BuildConfig.SMS_AUTO_READ) SBudget.setupBody.t() else SBudget.setupBodyPaste.t(), style = MaterialTheme.typography.bodyMedium, color = EasyTheme.colors.budget.onContainer)
                             Spacer(Modifier.height(12.dp))
                             BigButton(SBudget.addBank.t(), onClick = { nav.navigate(BankSetupRoute) })
                             Spacer(Modifier.height(8.dp))

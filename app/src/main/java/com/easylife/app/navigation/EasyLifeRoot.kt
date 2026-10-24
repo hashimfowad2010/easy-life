@@ -33,6 +33,8 @@ import com.easylife.app.MainViewModel
 import com.easylife.app.core.data.prefs.UserPrefs
 import com.easylife.app.core.designsystem.Module
 import com.easylife.app.core.devtools.DevToolsScreen
+import com.easylife.app.core.i18n.SBudget
+import com.easylife.app.core.i18n.currentLanguage
 import com.easylife.app.core.devtools.ErrorReportScreen
 import com.easylife.app.core.devtools.ParserLabScreen
 import com.easylife.app.core.devtools.RouterViewScreen
@@ -103,6 +105,7 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
     val destination = backStack?.destination
     val showBottomBar = prefs.onboardingDone && topLevel.any { r -> destination?.hasRoute(r) == true }
     val deepLink by viewModel.deepLink.collectAsStateWithLifecycle()
+    val lang = currentLanguage()
 
     LaunchedEffect(deepLink, prefs.onboardingDone) {
         val link = deepLink ?: return@LaunchedEffect
@@ -110,7 +113,13 @@ fun EasyLifeRoot(viewModel: MainViewModel, prefs: UserPrefs) {
         viewModel.consumeDeepLink()
         when (link) {
             is DeepLink.Route -> nav.openPath(link.path)
-            is DeepLink.SharedText -> scanVm.fromSharedText(link.text) { id -> nav.navigate(UrduRoute(tab = 1, draftId = id)) }
+            is DeepLink.SharedText -> scanVm.fromSharedText(
+                link.text,
+                onBudget = { s ->
+                    nav.navigate(TransactionsRoute)
+                    scope.launch { snackbar.showSnackbar(if (s.added + s.toReview > 0) SBudget.pasteResult.format(lang, s.added, s.toReview) else SBudget.pasteNothing.get(lang)) }
+                },
+            ) { id -> nav.navigate(UrduRoute(tab = 1, draftId = id)) }
             is DeepLink.SharedImages -> scanVm.fromImages(link.uris) { id -> nav.navigate(ScanConfirmRoute(id)) }
         }
     }

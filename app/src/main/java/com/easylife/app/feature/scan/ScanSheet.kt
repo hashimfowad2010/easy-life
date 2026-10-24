@@ -34,7 +34,11 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.easylife.app.core.budget.PastedSms
+import com.easylife.app.core.data.prefs.PrefsRepository
+import com.easylife.app.core.data.repo.BudgetRepository
 import com.easylife.app.core.designsystem.EasyTheme
+import com.easylife.app.core.designsystem.Module
 import com.easylife.app.core.designsystem.TintedIcon
 import com.easylife.app.core.i18n.SScan
 import com.easylife.app.core.i18n.t
@@ -46,10 +50,25 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ScanSheetViewModel @Inject constructor(private val drafts: ScanDraftStore) : ViewModel() {
+class ScanSheetViewModel @Inject constructor(
+    private val drafts: ScanDraftStore,
+    private val budget: BudgetRepository,
+    private val prefs: PrefsRepository,
+) : ViewModel() {
     // Work runs in viewModelScope so the callback (which navigates) is always on the main thread.
     fun fromImages(uris: List<Uri>, onReady: (String) -> Unit) = viewModelScope.launch { onReady(drafts.createFromImages(uris).id) }
-    fun fromSharedText(text: String, onReady: (String) -> Unit) = viewModelScope.launch { onReady(drafts.createFromText(text, com.easylife.app.core.scan.ScanDraft.SHARED).id) }
+
+    /**
+     * Shared text: a bank or wallet SMS goes straight into Budget (the main APK can't read SMS itself);
+     * anything else opens in Urdu Helper.
+     */
+    fun fromSharedText(text: String, onBudget: (BudgetRepository.PasteSummary) -> Unit, onReady: (String) -> Unit) = viewModelScope.launch {
+        if (Module.BUDGET in prefs.current().enabledModules && PastedSms.isBankAlert(text)) {
+            onBudget(budget.ingestPasted(text))
+        } else {
+            onReady(drafts.createFromText(text, com.easylife.app.core.scan.ScanDraft.SHARED).id)
+        }
+    }
     fun sample(name: String, onReady: (String) -> Unit) = viewModelScope.launch { onReady(drafts.createSample(name).id) }
 
 }

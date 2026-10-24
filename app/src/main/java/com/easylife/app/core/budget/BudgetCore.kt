@@ -1,5 +1,6 @@
 package com.easylife.app.core.budget
 
+import com.easylife.app.core.parse.SmsParser
 import java.time.Instant
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -36,6 +37,44 @@ object BankCatalog {
         val s = sender.uppercase().filter { it.isLetterOrDigit() }
         return all.firstOrNull { b -> b.senderKeys.any { s.contains(it) } }
     }
+
+    /**
+     * For a pasted or shared message (no sender): the first bank or wallet named in the text. Short keys must be
+     * whole words ("HBL"); longer ones may be split by spaces ("JS Bank", "Jazz Cash"). "PUNJAB" alone is a
+     * province, not Bank of Punjab.
+     */
+    fun bankInText(text: String): Bank? {
+        val upper = text.uppercase()
+        val squashed = upper.filter { it.isLetterOrDigit() }
+        return all.firstOrNull { b ->
+            b.senderKeys.any { key ->
+                when {
+                    key == "PUNJAB" -> false
+                    key.length >= 6 -> squashed.contains(key)
+                    else -> Regex("""\b${Regex.escape(key)}\b""").containsMatchIn(upper)
+                }
+            }
+        }
+    }
+}
+
+/** Bank messages the user pastes or shares into the app (the main APK cannot read SMS by itself). */
+object PastedSms {
+    /** Several messages pasted at once are separated by a blank line; tiny fragments are ignored. */
+    fun split(text: String): List<String> =
+        text.split(Regex("""\r?\n\s*\r?\n""")).map { it.trim() }.filter { it.length >= 15 }.take(100)
+
+    /** Sender to file a pasted message under: the bank named in it, else a generic "PASTED". */
+    fun senderFor(body: String): String = BankCatalog.bankInText(body)?.senderKeys?.first() ?: "PASTED"
+
+    /**
+     * Shared text that is a bank or wallet transaction alert, so it goes to Budget rather than Urdu Helper:
+     * it names a bank or wallet and reads as a transaction. OTP messages never qualify.
+     */
+    fun isBankAlert(text: String): Boolean =
+        BankCatalog.bankInText(text) != null &&
+            !SmsParser.isSecurityMessage(text) &&
+            SmsParser.parse(senderFor(text), text).result?.isTransaction == true
 }
 
 /** A finished transaction as the pure logic sees it. */

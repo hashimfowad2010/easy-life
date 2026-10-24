@@ -39,7 +39,7 @@ jobs:
           fi
 
       - name: Build, test, lint
-        run: ./gradlew --stacktrace testDebugUnitTest assembleDebug lintDebug
+        run: ./gradlew --stacktrace testStandardDebugUnitTest assembleStandardDebug assembleWithSmsDebug lintStandardDebug lintWithSmsDebug
 
       - name: Database schema unchanged (or bumped with a migration)
         run: |
@@ -49,11 +49,20 @@ jobs:
             exit 1
           fi
 
+      - name: Main APK has no permission that Google Play Protect blocks
+        run: |
+          BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+          APK=$(ls app/build/outputs/apk/standard/debug/*.apk | head -1)
+          if "$BT/aapt2" dump xmltree --file AndroidManifest.xml "$APK" | grep -E "READ_SMS|RECEIVE_SMS|BIND_NOTIFICATION_LISTENER_SERVICE|BIND_ACCESSIBILITY_SERVICE"; then
+            echo "::error::EasyLife.apk (standard) must not ask for SMS, notification or accessibility access: Play Protect blocks it. Put it in src/withSms."
+            exit 1
+          fi
+
       - name: Upload debug APK
         uses: actions/upload-artifact@v7
         with:
           name: easylife-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/*/debug/*.apk
           retention-days: 14
 
       - name: Upload reports

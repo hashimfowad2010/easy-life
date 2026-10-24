@@ -8,9 +8,6 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
-    <!-- Budget: bank/wallet SMS alerts (asked just-in-time in Bank setup; sideloaded build, see README). -->
-    <uses-permission android:name="android.permission.READ_SMS" />
-    <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.flash" android:required="false" />
@@ -65,27 +62,6 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
-
-        <!-- New bank SMS are read on the phone the moment they arrive (allow-listed senders only). -->
-        <receiver
-            android:name=".core.budget.SmsReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
-            <intent-filter>
-                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
-            </intent-filter>
-        </receiver>
-
-        <!-- Optional, off by default: wallets that send app notifications instead of SMS. -->
-        <service
-            android:name=".core.budget.WalletNotificationListener"
-            android:exported="true"
-            android:label="@string/app_name"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService" />
-            </intent-filter>
-        </service>
 
         <!-- WorkManager is initialised by EasyLifeApp (Hilt worker factory). -->
         <provider

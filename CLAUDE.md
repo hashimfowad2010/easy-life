@@ -2,8 +2,9 @@
 
 ## Build and test
 - **No local Android build.** Push to GitHub; Actions builds. Check runs with `gh run list -L 3`, `gh run watch <id>`, `gh run view <id> --log-failed`. A red build is never "done".
-- CI (`.github/workflows/ci.yml`): `./gradlew testDebugUnitTest assembleDebug lintDebug` + Cloud Functions `npm ci && npm run build && npm test`.
-- Release (`.github/workflows/release.yml`): push a tag `vA.B.C` → signed APK on a GitHub Release (`EasyLife-vA.B.C.apk` and `EasyLife.apk`). `versionCode = A*1_000_000 + B*1_000 + C`.
+- Two build variants (flavor dimension `distribution`): **`standard`** = `EasyLife.apk`, no SMS/notification-listener/accessibility (Google Play Protect blocks sideloaded apps that ask; CI fails if the standard APK declares them), bank SMS are pasted or shared in; **`withSms`** = `EasyLife-with-SMS.apk`, adds `src/withSms/AndroidManifest.xml` (READ/RECEIVE_SMS, SmsReceiver, WalletNotificationListener). Check `BuildConfig.SMS_AUTO_READ` in UI.
+- CI (`.github/workflows/ci.yml`): `./gradlew testStandardDebugUnitTest assembleStandardDebug assembleWithSmsDebug lintStandardDebug lintWithSmsDebug` + Cloud Functions `npm ci && npm run build && npm test`.
+- Release (`.github/workflows/release.yml`): push a tag `vA.B.C` → signed APKs on a GitHub Release (`EasyLife.apk` = standard, `EasyLife-with-SMS.apk`, plus versioned copies). `versionCode = A*1_000_000 + B*1_000 + C`.
 - Release notes: `release-notes/<tag>.md` (must contain "What to test on your phone").
 - Toolchain: AGP 9.4 (built-in Kotlin — no `kotlin-android` plugin), Kotlin 2.4, KSP 2.3, Gradle 9.8, JDK 21 in CI, compile/target SDK 37, minSdk 26.
 

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -27,6 +28,7 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -44,6 +46,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
+import com.easylife.app.BuildConfig
 import com.easylife.app.core.budget.BankCatalog
 import com.easylife.app.core.budget.SenderSuggestion
 import com.easylife.app.core.budget.SmsImporter
@@ -125,6 +128,15 @@ class BankSetupViewModel @Inject constructor(
         _import.value = ImportState(scanning = false, suggestions = null, imported = saved, discardedOtps = otps)
     }
 
+    private val _paste = MutableStateFlow<BudgetRepository.PasteSummary?>(null)
+    val paste = _paste.asStateFlow()
+
+    /** Main APK: bank messages the user pasted (same on-phone pipeline as SMS, OTPs dropped first). */
+    fun pasteMessages(text: String) = viewModelScope.launch {
+        _paste.value = repo.ingestPasted(text)
+        scheduler.checkSoon()
+    }
+
     fun setSmsSetupDone() = viewModelScope.launch { prefs.setSmsSetupDone(true) }
     fun setNotificationListener(on: Boolean) = viewModelScope.launch { prefs.setNotificationListenerEnabled(on) }
     fun setKeepRaw(on: Boolean) = viewModelScope.launch { prefs.setKeepRawSms(on) }
@@ -138,6 +150,7 @@ class BankSetupViewModel @Inject constructor(
 fun BankSetupScreen(nav: NavHostController, vm: BankSetupViewModel = hiltViewModel()) {
     val accounts by vm.accounts.collectAsStateWithLifecycle()
     val imp by vm.import.collectAsStateWithLifecycle()
+    val paste by vm.paste.collectAsStateWithLifecycle()
     val p by vm.prefsState.collectAsStateWithLifecycle()
     val lang = currentLanguage()
     val context = LocalContext.current
@@ -170,60 +183,95 @@ fun BankSetupScreen(nav: NavHostController, vm: BankSetupViewModel = hiltViewMod
             }
             BigOutlinedButton(SBudget.addBank.t(), icon = Icons.Rounded.Add, onClick = { adding = true })
 
-            SectionHeader(SBudget.smsPermissionTitle.t())
-            if (!hasSms) {
-                EasyCard {
-                    Text(SBudget.smsPermissionBody.t(), style = MaterialTheme.typography.bodyMedium)
-                    TextButton(onClick = { smsLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) }) {
-                        Icon(Icons.Rounded.Sms, null)
-                        Text(" " + SBudget.allowSms.t())
+            if (BuildConfig.SMS_AUTO_READ) {
+                SectionHeader(SBudget.smsPermissionTitle.t())
+                if (!hasSms) {
+                    EasyCard {
+                        Text(SBudget.smsPermissionBody.t(), style = MaterialTheme.typography.bodyMedium)
+                        TextButton(onClick = { smsLauncher.launch(arrayOf(Manifest.permission.READ_SMS, Manifest.permission.RECEIVE_SMS)) }) {
+                            Icon(Icons.Rounded.Sms, null)
+                            Text(" " + SBudget.allowSms.t())
+                        }
                     }
-                }
-                if (denied) InfoBanner(SBudget.smsDenied.t(), BannerKind.INFO)
-            } else {
-                BigButton(SBudget.scan90.t(), onClick = vm::scan, enabled = !imp.scanning)
-            }
-            if (imp.scanning) {
-                Text(SBudget.scanning.t())
-                LinearProgressIndicator(Modifier.padding(vertical = 4.dp))
-            }
-            imp.imported?.let { n ->
-                InfoBanner(SBudget.imported.t(n), BannerKind.SUCCESS)
-                if (imp.discardedOtps > 0) InfoBanner(SBudget.otpDiscarded.t(imp.discardedOtps), BannerKind.INFO)
-            }
-            imp.suggestions?.let { list ->
-                if (list.isEmpty()) {
-                    InfoBanner(SBudget.noSenders.t())
+                    if (denied) InfoBanner(SBudget.smsDenied.t(), BannerKind.INFO)
                 } else {
-                    var chosen by remember(list) { mutableStateOf(list.filter { it.bankId != null }.map { it.sender }.toSet()) }
-                    Text(SBudget.suggestedSenders.t(), style = MaterialTheme.typography.bodyMedium)
-                    list.forEach { s ->
-                        ListItem(
-                            headlineContent = { Text(s.sender) },
-                            supportingContent = { Text(listOfNotNull(s.bankId?.let { BankCatalog.byId(it).nameEn }, SBudget.messagesCount.t(s.transactionCount)).joinToString(" · ")) },
-                            leadingContent = { Checkbox(checked = s.sender in chosen, onCheckedChange = { c -> chosen = if (c) chosen + s.sender else chosen - s.sender }) },
-                        )
-                    }
-                    BigButton(SBudget.importSelected.t(), enabled = chosen.isNotEmpty() && !imp.scanning, onClick = { vm.importFrom(list.filter { it.sender in chosen }) })
+                    BigButton(SBudget.scan90.t(), onClick = vm::scan, enabled = !imp.scanning)
                 }
+                if (imp.scanning) {
+                    Text(SBudget.scanning.t())
+                    LinearProgressIndicator(Modifier.padding(vertical = 4.dp))
+                }
+                imp.imported?.let { n ->
+                    InfoBanner(SBudget.imported.t(n), BannerKind.SUCCESS)
+                    if (imp.discardedOtps > 0) InfoBanner(SBudget.otpDiscarded.t(imp.discardedOtps), BannerKind.INFO)
+                }
+                imp.suggestions?.let { list ->
+                    if (list.isEmpty()) {
+                        InfoBanner(SBudget.noSenders.t())
+                    } else {
+                        var chosen by remember(list) { mutableStateOf(list.filter { it.bankId != null }.map { it.sender }.toSet()) }
+                        Text(SBudget.suggestedSenders.t(), style = MaterialTheme.typography.bodyMedium)
+                        list.forEach { s ->
+                            ListItem(
+                                headlineContent = { Text(s.sender) },
+                                supportingContent = { Text(listOfNotNull(s.bankId?.let { BankCatalog.byId(it).nameEn }, SBudget.messagesCount.t(s.transactionCount)).joinToString(" · ")) },
+                                leadingContent = { Checkbox(checked = s.sender in chosen, onCheckedChange = { c -> chosen = if (c) chosen + s.sender else chosen - s.sender }) },
+                            )
+                        }
+                        BigButton(SBudget.importSelected.t(), enabled = chosen.isNotEmpty() && !imp.scanning, onClick = { vm.importFrom(list.filter { it.sender in chosen }) })
+                    }
+                }
+    
+                SectionHeader(SBudget.notificationAccess.t())
+                SettingsSwitchRow(
+                    SBudget.notificationAccess.t(),
+                    subtitle = SBudget.notificationAccessNote.t(),
+                    checked = p?.notificationListenerEnabled == true,
+                    onCheckedChange = { on ->
+                        vm.setNotificationListener(on)
+                        if (on) runCatching { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
+                    },
+                )
+            } else {
+                PasteMessagesCard(paste, onAdd = vm::pasteMessages)
             }
-
-            SectionHeader(SBudget.notificationAccess.t())
-            SettingsSwitchRow(
-                SBudget.notificationAccess.t(),
-                subtitle = SBudget.notificationAccessNote.t(),
-                checked = p?.notificationListenerEnabled == true,
-                onCheckedChange = { on ->
-                    vm.setNotificationListener(on)
-                    if (on) runCatching { context.startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)) }
-                },
-            )
             SettingsSwitchRow(SBudget.keepRaw.t(), subtitle = SBudget.keepRawNote.t(), checked = p?.keepRawSms != false, onCheckedChange = vm::setKeepRaw)
             OutlinedButton(onClick = { vm.purge { scope.launch { snackbar.showSnackbar(purgedMsg) } } }) { Text(SBudget.purgeRaw.t()) }
             Text(SBudget.purgeRawNote.t(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
     if (adding) AddBankDialog(onDismiss = { adding = false }, onAdd = { b, n, l -> vm.addBank(b, n, l); adding = false })
+}
+
+/** Main APK: paste one or many bank SMS (or share them to the app); a summary shows what happened. */
+@Composable
+private fun PasteMessagesCard(result: BudgetRepository.PasteSummary?, onAdd: (String) -> Unit) {
+    var text by remember { mutableStateOf("") }
+    SectionHeader(SBudget.pasteTitle.t())
+    EasyCard {
+        Text(SBudget.pasteBody.t(), style = MaterialTheme.typography.bodyMedium)
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it.take(20_000) },
+            placeholder = { Text(SBudget.pasteHint.t()) },
+            minLines = 3,
+            maxLines = 8,
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+        )
+        BigButton(SBudget.pasteAdd.t(), enabled = text.isNotBlank(), onClick = {
+            onAdd(text)
+            text = ""
+        })
+    }
+    result?.let { r ->
+        if (r.added + r.toReview > 0) {
+            InfoBanner(SBudget.pasteResult.t(r.added, r.toReview), BannerKind.SUCCESS)
+        } else if (r.securityDiscarded == 0) {
+            InfoBanner(SBudget.pasteNothing.t(), BannerKind.WARNING)
+        }
+        if (r.securityDiscarded > 0) InfoBanner(SBudget.otpDiscarded.t(r.securityDiscarded), BannerKind.INFO)
+    }
+    Text(SBudget.autoReadElsewhere.t(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
 }
 
 @Composable

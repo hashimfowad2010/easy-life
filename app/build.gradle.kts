@@ -42,6 +42,22 @@ android {
         buildConfigField("String", "GIT_SHA", "\"${(System.getenv("GITHUB_SHA") ?: "local").take(7)}\"")
     }
 
+    // Google Play Protect blocks apps installed from a browser or file manager that ask to read SMS or
+    // notifications. "standard" (EasyLife.apk) leaves those out: bank SMS are pasted or shared in instead.
+    // "withSms" (EasyLife-with-SMS.apk) keeps automatic SMS reading for phones where it is allowed.
+    flavorDimensions += "distribution"
+    productFlavors {
+        create("standard") {
+            dimension = "distribution"
+            isDefault = true
+            buildConfigField("boolean", "SMS_AUTO_READ", "false")
+        }
+        create("withSms") {
+            dimension = "distribution"
+            buildConfigField("boolean", "SMS_AUTO_READ", "true")
+        }
+    }
+
     signingConfigs {
         create("release") {
             if (releaseKeystorePath != null) {

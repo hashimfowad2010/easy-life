@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only in EasyLife-with-SMS.apk: automatic reading of bank SMS and wallet notifications.
+     Kept out of the main APK because Google Play Protect blocks sideloaded apps that ask for these. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Budget: bank/wallet SMS alerts (asked just-in-time in Bank setup). -->
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
+    <application>
+        <!-- New bank SMS are read on the phone the moment they arrive (allow-listed senders only). -->
+        <receiver
+            android:name="com.easylife.app.core.budget.SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <intent-filter>
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+        </receiver>
+
+        <!-- Optional, off by default: wallets that send app notifications instead of SMS. -->
+        <service
+            android:name="com.easylife.app.core.budget.WalletNotificationListener"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+    </application>
+</manifest>

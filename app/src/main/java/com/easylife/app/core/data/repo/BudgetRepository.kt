@@ -14,6 +14,7 @@ import com.easylife.app.core.budget.Exclusions
 import com.easylife.app.core.budget.OpenBill
 import com.easylife.app.core.budget.Pairing
 import com.easylife.app.core.budget.PairSuggestion
+import com.easylife.app.core.budget.PastedSms
 import com.easylife.app.core.budget.RuleField
 import com.easylife.app.core.budget.Tx
 import com.easylife.app.core.data.db.AccountEntity
@@ -111,11 +112,21 @@ class BudgetRepository @Inject constructor(
 
     // ---------------------------------------------------------------- ingest
 
-    suspend fun ingest(sender: String, body: String, receivedAt: Instant, channel: String = "SMS", isDemo: Boolean = false): IngestResult = mutex.withLock {
+    /**
+     * @param userChosen the user pasted or shared this very message, so the sender allow-list does not apply.
+     */
+    suspend fun ingest(
+        sender: String,
+        body: String,
+        receivedAt: Instant,
+        channel: String = "SMS",
+        isDemo: Boolean = false,
+        userChosen: Boolean = false,
+    ): IngestResult = mutex.withLock {
         // 1. OTP / security messages: discarded before anything else, never stored.
         if (SmsParser.isSecurityMessage(body)) return IngestResult.DISCARDED_SECURITY
-        // 2. Only allow-listed senders.
-        if (!isDemo && !isAllowed(sender)) return IngestResult.NOT_ALLOWED
+        // 2. Only allow-listed senders (or a message the user chose to add).
+        if (!isDemo && !userChosen && !isAllowed(sender)) return IngestResult.NOT_ALLOWED
         // Same message delivered twice (e.g. re-import).
         if (dao.countSameRaw(sender, body, receivedAt) > 0) return IngestResult.DUPLICATE
 
@@ -165,6 +176,32 @@ class BudgetRepository @Inject constructor(
             return IngestResult.REVIEW
         }
         return IngestResult.SAVED
+    }
+
+    data class PasteSummary(val added: Int, val toReview: Int, val securityDiscarded: Int, val duplicates: Int, val notTransactions: Int) {
+        val total: Int get() = added + toReview + securityDiscarded + duplicates + notTransactions
+    }
+
+    /**
+     * Bank or wallet messages the user pasted or shared (one or many, separated by a blank line). Same pipeline as
+     * SMS: OTPs dropped first, parsed on the phone, de-duplicated, then saved or sent to the review inbox.
+     */
+    suspend fun ingestPasted(text: String, receivedAt: Instant = Instant.now()): PasteSummary {
+        var added = 0
+        var review = 0
+        var security = 0
+        var duplicates = 0
+        var other = 0
+        PastedSms.split(text).forEach { body ->
+            when (ingest(PastedSms.senderFor(body), body, receivedAt, channel = "PASTE", userChosen = true)) {
+                IngestResult.SAVED -> added++
+                IngestResult.REVIEW -> review++
+                IngestResult.DISCARDED_SECURITY -> security++
+                IngestResult.DUPLICATE -> duplicates++
+                IngestResult.PROMO, IngestResult.NOT_ALLOWED -> other++
+            }
+        }
+        return PasteSummary(added, review, security, duplicates, other)
     }
 
     /** Categorise, apply exclusion rules, save, then look for bill payments / transfers / refunds. */
