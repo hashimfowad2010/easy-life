@@ -1,6 +1,6 @@
 # Progress
 
-**Latest release: [v0.9.4](https://github.com/hashimfowad2010/easy-life/releases/tag/v0.9.4)**: `EasyLife.apk` (30 MB, installs without the Play Protect block; bank SMS shared or pasted) and optional `EasyLife-with-SMS.apk`. Earlier: v0.9.3 (Firebase connected; blocked by Play Protect on some phones), v0.9.2 (Gemini, Firebase off), v0.9.1 (smaller download), v0.9.0 (first release, 120 MB).
+**Latest release: [v0.9.5](https://github.com/hashimfowad2010/easy-life/releases/tag/v0.9.5)**: colour schemes, text size and a cleaner look; `EasyLife.apk` (30 MB, installs without the Play Protect block) and optional `EasyLife-with-SMS.apk`. Earlier: v0.9.4 (two APKs, share/paste bank SMS), v0.9.3 (Firebase connected; blocked by Play Protect on some phones), v0.9.2 (Gemini, Firebase off), v0.9.1 (smaller download), v0.9.0 (first release, 120 MB).
 
 Updated: 24 Oct 2026. Every item marked done is in `main`, builds in CI and passes its unit tests. The emulator smoke test walks the main screens in English and Urdu on every push.
 
