@@ -1,6 +1,6 @@
 # Progress
 
-**Latest release: [v0.9.1](https://github.com/hashimfowad2010/easy-life/releases/tag/v0.9.1)** (30 MB download, all five modules). Earlier: v0.9.0 (same features, 120 MB).
+**Latest release: [v0.9.2](https://github.com/hashimfowad2010/easy-life/releases/tag/v0.9.2)** (30 MB download, all five modules, free Smart AI with Google Gemini). Earlier: v0.9.1 (smaller download), v0.9.0 (first release, 120 MB).
 
 Updated: 24 Oct 2026. Every item marked done is in `main`, builds in CI and passes its unit tests. The emulator smoke test walks the main screens in English and Urdu on every push.
 
