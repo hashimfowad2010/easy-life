@@ -47,8 +47,10 @@ jobs:
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
           # The test APK is kept installed (-Pandroid.injected.androidTest.leaveApksInstalledAfterRun) so files can be pulled.
           script: |
-            ./gradlew --no-configuration-cache connectedStandardDebugAndroidTest -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true > test-output.txt 2>&1; echo $? > test-exit.txt
+            # Capped so a hang still leaves time to collect screenshots and logs below.
+            timeout 25m ./gradlew --no-configuration-cache connectedStandardDebugAndroidTest -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true > test-output.txt 2>&1; echo $? > test-exit.txt
             mkdir -p screenshots && adb pull /sdcard/Android/data/com.easylife.app.debug/files/screenshots/. screenshots/ || true
+            adb pull /sdcard/Android/media/com.easylife.app.debug/additional_test_output screenshots/device-output || true
             adb logcat -d > screenshots/logcat.txt || true
             tail -60 test-output.txt; grep -E "AndroidRuntime|FATAL" screenshots/logcat.txt | tail -50 || true
             exit $(cat test-exit.txt)

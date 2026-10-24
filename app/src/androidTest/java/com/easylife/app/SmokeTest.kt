@@ -1,6 +1,7 @@
 package com.easylife.app
 
 import android.graphics.Bitmap
+import android.os.Looper
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.test.ExperimentalTestApi
@@ -21,9 +22,11 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Rule
+import org.junit.rules.Timeout
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * End-to-end smoke test on an emulator (CI): onboarding, demo data, every main screen in English and Urdu,
@@ -32,6 +35,10 @@ import java.io.File
 @OptIn(ExperimentalTestApi::class)
 @RunWith(AndroidJUnit4::class)
 class SmokeTest {
+
+    /** A hang fails the test (with evidence) instead of running until the CI job is killed. */
+    @get:Rule
+    val timeout: Timeout = Timeout.builder().withTimeout(15, TimeUnit.MINUTES).withLookingForStuckThread(true).build()
 
     @get:Rule
     val compose = createEmptyComposeRule()
@@ -93,11 +100,21 @@ class SmokeTest {
         try {
             runFlow()
         } catch (e: Throwable) {
-            // Leave evidence for CI: what was on screen and the UI tree.
-            shot("zz-failure")
+            // Evidence for CI that works even if the app never goes idle (a hang): a plain screenshot, the main
+            // thread's stack, and the UI tree if it can be read within 15 s.
             runCatching {
-                File(shotsDir, "zz-failure-tree.txt").writeText(compose.onAllNodes(isRoot()).onFirst().printToString(maxDepth = 40))
+                instrumentation.uiAutomation.takeScreenshot()?.let { bmp ->
+                    File(shotsDir, "zz-failure.png").outputStream().use { bmp.compress(Bitmap.CompressFormat.PNG, 100, it) }
+                }
             }
+            runCatching { File(shotsDir, "zz-main-thread.txt").writeText(Looper.getMainLooper().thread.stackTrace.joinToString("\n")) }
+            val tree = Thread {
+                runCatching {
+                    File(shotsDir, "zz-failure-tree.txt").writeText(compose.onAllNodes(isRoot()).onFirst().printToString(maxDepth = 40))
+                }
+            }
+            tree.start()
+            tree.join(15_000)
             throw e
         }
     }
