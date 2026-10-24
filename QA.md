@@ -51,6 +51,8 @@ Tick each item in **both English and Urdu**, and in **light and dark** mode (Set
 ## Settings, privacy, data
 - [ ] Language switch in Settings flips text and direction.
 - [ ] Urdu font Nastaliq ↔ Naskh.
+- [ ] Settings → Appearance → Colour: each swatch (Teal, Blue, Green, Purple, Orange, Rose; "Wallpaper" on Android 12+) recolours the whole app at once, in light and dark; module colours stay the same.
+- [ ] Settings → Appearance → Text size: Normal / Large / Larger makes all text bigger; nothing is cut off.
 - [ ] Smart AI page explains Gemini's free-tier data use honestly; the switch stays off until "I am 18 or older. Turn on" is tapped (and that button is disabled in a build without Firebase).
 - [ ] Export all my data → choose a file → a JSON file is written.
 - [ ] Delete all my data → confirm → app restarts at onboarding with nothing left.
@@ -91,7 +93,7 @@ Tick each item in **both English and Urdu**, and in **light and dark** mode (Set
 - [ ] Share the list in Urdu and in English (WhatsApp).
 
 ## Impact and feedback
-- [ ] Settings → Help the project → ILAP impact report: highlights and bars show the demo activity; "Save as CSV" and "Save one-page PDF" write files that open.
+- [ ] Settings → Help the project → Impact report: highlights and bars show the demo activity; "Save as CSV" and "Save one-page PDF" write files that open.
 - [ ] The PDF is one page and readable in Urdu too.
 - [ ] Settings → Give feedback: Send stays disabled until questions 1 and 3 are answered; after sending, the Today card does not come back.
 - [ ] Three days after install a "How is Easy Life helping?" card appears on Today; "Later" hides it for 3 days.

@@ -66,7 +66,9 @@ class SmokeTest {
 
     private fun clickDescription(description: String) {
         compose.waitUntil(10_000) { compose.onAllNodesWithContentDescription(description).fetchSemanticsNodes().isNotEmpty() }
-        compose.onAllNodesWithContentDescription(description).onFirst().performClick()
+        val node = compose.onAllNodesWithContentDescription(description).onFirst()
+        runCatching { node.performScrollTo() }
+        node.performClick()
         compose.waitForIdle()
     }
 
@@ -167,6 +169,14 @@ class SmokeTest {
         click("Settings")
         waitText("Language")
         shot("en-11-settings")
+        // Appearance: another colour scheme recolours the whole app at once; then back to the default.
+        clickDescription("Colour: Purple")
+        shot("en-12-settings-purple")
+        click("Today")
+        waitText("Bijli Guard")
+        shot("en-13-today-purple")
+        click("Settings")
+        clickDescription("Colour: Teal")
         // Urdu: the whole UI right-to-left. Switch while the app is open, then start fresh on Today.
         setLocale("ur")
         scenario?.close()

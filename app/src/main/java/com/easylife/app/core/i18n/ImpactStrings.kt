@@ -1,7 +1,7 @@
 package com.easylife.app.core.i18n
 
 object SImpact {
-    val reportTitle = Txt("ILAP impact report", "ILAP اثر رپورٹ")
+    val reportTitle = Txt("Impact report", "اثر رپورٹ")
     val reportIntro = Txt(
         "What Easy Life did on this phone. Counts only: no bills, messages or names.",
         "اس فون پر آسان زندگی نے کیا کیا۔ صرف گنتی: کوئی بل، پیغام یا نام نہیں۔",

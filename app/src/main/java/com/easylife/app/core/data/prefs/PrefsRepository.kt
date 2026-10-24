@@ -11,6 +11,8 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.easylife.app.core.designsystem.Module
+import com.easylife.app.core.designsystem.ColorPalette
+import com.easylife.app.core.designsystem.TextSize
 import com.easylife.app.core.designsystem.ThemeMode
 import com.easylife.app.core.designsystem.UrduFont
 import com.easylife.app.core.i18n.AppLanguage
@@ -42,6 +44,8 @@ data class UserPrefs(
     val communityPricesConsent: Boolean? = null,
     val urduFont: UrduFont = UrduFont.NASTALIQ,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val palette: ColorPalette = ColorPalette.TEAL,
+    val textSize: TextSize = TextSize.NORMAL,
     val quietStartHour: Int = 22,
     val quietEndHour: Int = 8,
     val notifyLimits: Boolean = true,
@@ -80,6 +84,8 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
         val communityConsent = stringPreferencesKey("community_prices_consent")
         val urduFont = stringPreferencesKey("urdu_font")
         val themeMode = stringPreferencesKey("theme_mode")
+        val palette = stringPreferencesKey("color_palette")
+        val textSize = stringPreferencesKey("text_size")
         val quietStart = intPreferencesKey("quiet_start")
         val quietEnd = intPreferencesKey("quiet_end")
         val notifyLimits = booleanPreferencesKey("notify_limits")
@@ -121,6 +127,8 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
             communityPricesConsent = p[K.communityConsent]?.toBooleanStrictOrNull(),
             urduFont = p[K.urduFont]?.let { v -> UrduFont.entries.firstOrNull { it.name == v } } ?: UrduFont.NASTALIQ,
             themeMode = p[K.themeMode]?.let { v -> ThemeMode.entries.firstOrNull { it.name == v } } ?: ThemeMode.SYSTEM,
+            palette = p[K.palette]?.let { v -> ColorPalette.entries.firstOrNull { it.name == v } } ?: ColorPalette.TEAL,
+            textSize = p[K.textSize]?.let { v -> TextSize.entries.firstOrNull { it.name == v } } ?: TextSize.NORMAL,
             quietStartHour = p[K.quietStart] ?: 22,
             quietEndHour = p[K.quietEnd] ?: 8,
             notifyLimits = p[K.notifyLimits] ?: true,
@@ -173,6 +181,8 @@ class PrefsRepository @Inject constructor(@ApplicationContext private val contex
     suspend fun setCommunityPricesConsent(v: Boolean) = context.dataStore.edit { it[K.communityConsent] = v.toString() }
     suspend fun setUrduFont(f: UrduFont) = context.dataStore.edit { it[K.urduFont] = f.name }
     suspend fun setThemeMode(m: ThemeMode) = context.dataStore.edit { it[K.themeMode] = m.name }
+    suspend fun setPalette(p: ColorPalette) = context.dataStore.edit { it[K.palette] = p.name }
+    suspend fun setTextSize(s: TextSize) = context.dataStore.edit { it[K.textSize] = s.name }
     suspend fun setQuietHours(start: Int, end: Int) = context.dataStore.edit { it[K.quietStart] = start; it[K.quietEnd] = end }
     suspend fun setNotifyLimits(v: Boolean) = context.dataStore.edit { it[K.notifyLimits] = v }
     suspend fun setNotifyBills(v: Boolean) = context.dataStore.edit { it[K.notifyBills] = v }

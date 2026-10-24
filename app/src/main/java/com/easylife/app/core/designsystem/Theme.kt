@@ -1,9 +1,13 @@
 package com.easylife.app.core.designsystem
 
+import android.os.Build
+import androidx.annotation.ChecksSdkIntAtLeast
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -11,6 +15,9 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Density
 import com.easylife.app.core.i18n.AppLanguage
 import com.easylife.app.core.limits.Risk
 
@@ -81,7 +88,7 @@ private val DarkExtended = ExtendedColors(
     uncertain = Color(0xFF6B5200),
 )
 
-private val LightScheme: ColorScheme = lightColorScheme(
+internal val TealLightScheme: ColorScheme = lightColorScheme(
     primary = Color(0xFF00796B),
     onPrimary = Color.White,
     primaryContainer = Color(0xFFB2E5DD),
@@ -113,7 +120,7 @@ private val LightScheme: ColorScheme = lightColorScheme(
     surfaceContainerHighest = Color(0xFFDEE4E2),
 )
 
-private val DarkScheme: ColorScheme = darkColorScheme(
+internal val TealDarkScheme: ColorScheme = darkColorScheme(
     primary = Color(0xFF80CBC0),
     onPrimary = Color(0xFF003731),
     primaryContainer = Color(0xFF005048),
@@ -156,11 +163,17 @@ object EasyTheme {
         @Composable @ReadOnlyComposable get() = LocalExtendedColors.current
 }
 
+/** Wallpaper colours (Material You) exist on Android 12 and newer. */
+@ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
+fun supportsWallpaperColors(): Boolean = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+
 @Composable
 fun EasyLifeTheme(
     language: AppLanguage,
     urduFont: UrduFont,
     themeMode: ThemeMode = ThemeMode.SYSTEM,
+    palette: ColorPalette = ColorPalette.TEAL,
+    textSize: TextSize = TextSize.NORMAL,
     content: @Composable () -> Unit,
 ) {
     val dark = when (themeMode) {
@@ -168,9 +181,20 @@ fun EasyLifeTheme(
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
-    CompositionLocalProvider(LocalExtendedColors provides if (dark) DarkExtended else LightExtended) {
+    val context = LocalContext.current
+    val scheme = if (palette == ColorPalette.WALLPAPER && supportsWallpaperColors()) {
+        if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    } else {
+        if (dark) paletteDarkScheme(palette) else paletteLightScheme(palette)
+    }
+    // The app's own text size multiplies the phone's font size (both are respected).
+    val density = LocalDensity.current
+    CompositionLocalProvider(
+        LocalExtendedColors provides if (dark) DarkExtended else LightExtended,
+        LocalDensity provides Density(density.density, density.fontScale * textSize.factor),
+    ) {
         MaterialTheme(
-            colorScheme = if (dark) DarkScheme else LightScheme,
+            colorScheme = scheme,
             typography = easyTypography(language, urduFont),
             shapes = EasyShapes,
             content = content,

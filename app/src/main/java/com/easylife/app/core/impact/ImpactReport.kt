@@ -40,7 +40,7 @@ data class ImpactSummary(
 }
 
 /**
- * Builds the "ILAP impact report" (spec section 8) from the events stored on the phone. Pure, so it is unit-tested;
+ * Builds the "Impact report" (spec section 8) from the events stored on the phone. Pure, so it is unit-tested;
  * the screen, CSV and PDF all use the same numbers.
  */
 object ImpactReport {
@@ -104,7 +104,7 @@ object ImpactReport {
     /** CSV with a header block, per-module totals and AI source stats. Comma-safe (no free text). */
     fun csv(s: ImpactSummary): String = buildString {
         fun line(vararg cells: Any?) = appendLine(cells.joinToString(",") { c -> csvCell(c) })
-        line("report", "Easy Life ILAP impact report")
+        line("report", "Easy Life impact report")
         line("pilot_code", s.pilotCode ?: "")
         line("from", s.from?.toString() ?: "")
         line("to", s.to.toString())

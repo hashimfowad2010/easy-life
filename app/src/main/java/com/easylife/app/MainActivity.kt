@@ -36,7 +36,13 @@ class MainActivity : AppCompatActivity() {
             // The per-app locale (set with AppCompatDelegate) drives both text and RTL layout.
             val language = AppLanguage.fromTag(LocalConfiguration.current.locales[0].language) ?: AppLanguage.EN
             CompositionLocalProvider(LocalAppLanguage provides language) {
-                EasyLifeTheme(language = language, urduFont = state.prefs.urduFont, themeMode = state.prefs.themeMode) {
+                EasyLifeTheme(
+                    language = language,
+                    urduFont = state.prefs.urduFont,
+                    themeMode = state.prefs.themeMode,
+                    palette = state.prefs.palette,
+                    textSize = state.prefs.textSize,
+                ) {
                     if (!state.loading) EasyLifeRoot(viewModel = viewModel, prefs = state.prefs)
                 }
             }

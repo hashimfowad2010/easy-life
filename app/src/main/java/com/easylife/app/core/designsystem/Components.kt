@@ -58,6 +58,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.Role
@@ -138,16 +139,19 @@ fun EasyCard(
     onClick: (() -> Unit)? = null,
     containerColor: Color = MaterialTheme.colorScheme.surfaceContainerLow,
     contentPadding: PaddingValues = PaddingValues(16.dp),
+    /** Optional soft gradient drawn over [containerColor] (used for the module tiles). */
+    brush: Brush? = null,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = CardDefaults.cardColors(containerColor = containerColor)
+    val inner = (if (brush != null) Modifier.background(brush) else Modifier).padding(contentPadding)
     if (onClick != null) {
         Card(onClick = onClick, modifier = modifier.fillMaxWidth(), colors = colors, shape = MaterialTheme.shapes.large) {
-            Column(Modifier.padding(contentPadding), content = content)
+            Column(inner, content = content)
         }
     } else {
         Card(modifier = modifier.fillMaxWidth(), colors = colors, shape = MaterialTheme.shapes.large) {
-            Column(Modifier.padding(contentPadding), content = content)
+            Column(inner, content = content)
         }
     }
 }
@@ -393,12 +397,42 @@ fun LoadingBox(text: String? = null, modifier: Modifier = Modifier) {
     }
 }
 
+/** A titled, rounded card of settings rows (grouped-list style). */
+@Composable
+fun SettingsGroup(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier.fillMaxWidth()) {
+        SectionHeader(title, Modifier.padding(horizontal = 4.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        ) {
+            Column(Modifier.padding(vertical = 6.dp), content = content)
+        }
+    }
+}
+
+/** Small label above a group of choices inside a [SettingsGroup]. */
+@Composable
+fun SettingsLabel(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 10.dp, bottom = 6.dp),
+    )
+}
+
+@Composable
+private fun RowIcon(icon: ImageVector) =
+    TintedIcon(icon, MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer, size = 38.dp)
+
 @Composable
 fun SettingsSwitchRow(title: String, subtitle: String? = null, checked: Boolean, onCheckedChange: (Boolean) -> Unit, icon: ImageVector? = null, enabled: Boolean = true) {
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = subtitle?.let { { Text(it) } },
-        leadingContent = icon?.let { { Icon(it, contentDescription = null) } },
+        leadingContent = icon?.let { { RowIcon(it) } },
         trailingContent = { Switch(checked = checked, onCheckedChange = onCheckedChange, enabled = enabled) },
         modifier = Modifier.clickable(enabled = enabled, role = Role.Switch) { onCheckedChange(!checked) },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
@@ -410,7 +444,7 @@ fun SettingsNavRow(title: String, subtitle: String? = null, icon: ImageVector? =
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = subtitle?.let { { Text(it) } },
-        leadingContent = icon?.let { { Icon(it, contentDescription = null) } },
+        leadingContent = icon?.let { { RowIcon(it) } },
         trailingContent = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (trailing != null) Text(trailing, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)

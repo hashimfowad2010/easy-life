@@ -34,7 +34,7 @@ Done: Roman-Urdu/Urdu/English list parser + grocery dictionary, saved lists with
 ## Phase 5: Polish 🟡 (in progress)
 Done:
 - Impact events (anonymous, rounded, opt-in upload) including **cycles kept under the limit after a warning** and AI source + correction rate.
-- **ILAP impact report** (Settings → Help the project): highlights, activity per module, results per AI source; **CSV** and **one-page PDF** export.
+- **Impact report** (Settings → Help the project): highlights, activity per module, results per AI source; **CSV** and **one-page PDF** export.
 - **Feedback** after 3 days of use (Today card, or Settings): 3 questions in Urdu/English, sent anonymously, kept and retried when offline.
 - Demo mode (fictional family: bill history crossing 200 in July, readings, transactions with an exclusion, saved shopping list, translated circular).
 - **Optional paid path (not needed):** Cloud Functions `ai` and `shopSearch` (TypeScript, Claude Haiku 5.5 / Sonnet 5.5, structured JSON output, server-side masking, per-user and daily limits, monthly USD budget, web search limited to the retailer allowlist, shared 24 h price cache). 25 tests with a fake Anthropic client run in CI. **Not deployed.**
@@ -45,6 +45,7 @@ Done:
 - Remote Config template generated from the app's bundled defaults (CI checks it stays in sync); manual "Deploy Firebase" workflow.
 - Script to combine pilot results from all phones into CSVs (run locally, never in public CI).
 - Emulator smoke test with screenshots in English and Urdu.
+- **Appearance** (Settings): colour schemes (Teal, Blue, Green, Purple, Orange, Rose, or the phone's wallpaper colours on Android 12+), light/dark, text size (Normal / Large / Larger); all schemes unit-tested for readable contrast (WCAG 4.5:1). Settings regrouped into cards; gradient Today header and module tiles.
 - README with architecture diagram, privacy, limitations, "Switching on Smart AI (Claude)" and cost table, scaling plan.
 
 Not done yet:
@@ -65,4 +66,4 @@ Install `EasyLife.apk` from the latest release, then follow [QA.md](QA.md). Quic
 5. Modules → Urdu Helper → type an English sentence → Translate → Read aloud.
 6. Modules → Smart Shopping → "Weekly groceries" → Compare prices.
 7. Modules → Budget → Transactions → exclude one → totals change; Undo.
-8. Settings → Help the project → ILAP impact report → Save one-page PDF.
+8. Settings → Help the project → Impact report → Save one-page PDF.

@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
@@ -31,7 +33,8 @@ import com.easylife.app.core.data.repo.state
 import com.easylife.app.core.designsystem.EasyCard
 import com.easylife.app.core.designsystem.EasyTheme
 import com.easylife.app.core.designsystem.Module
-import com.easylife.app.core.designsystem.ModuleIcon
+import com.easylife.app.core.designsystem.TintedIcon
+import com.easylife.app.core.designsystem.icon
 import com.easylife.app.core.designsystem.title
 import com.easylife.app.core.i18n.AppLanguage
 import com.easylife.app.core.i18n.Fmt
@@ -107,9 +110,10 @@ fun ModulesScreen(nav: NavHostController, vm: ModulesViewModel = hiltViewModel()
             EasyCard(
                 modifier = Modifier.heightIn(min = 170.dp).alpha(if (tile.enabled) 1f else 0.5f),
                 containerColor = colors.container,
+                brush = Brush.linearGradient(listOf(colors.container, colors.accent.copy(alpha = 0.16f).compositeOver(colors.container))),
                 onClick = { nav.navigate(tile.module.route()) },
             ) {
-                ModuleIcon(tile.module, 48.dp)
+                TintedIcon(tile.module.icon, colors.accent, MaterialTheme.colorScheme.surface.copy(alpha = 0.8f), 48.dp)
                 Spacer(Modifier.height(10.dp))
                 Text(tile.module.title.t(), style = MaterialTheme.typography.titleMedium, color = colors.onContainer)
                 Text(tile.module.description().t(), style = MaterialTheme.typography.bodySmall, color = colors.onContainer.copy(alpha = 0.8f), maxLines = 2)

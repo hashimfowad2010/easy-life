@@ -159,7 +159,7 @@ Claude API list prices (checked 23 Oct 2026): **Haiku 5.5** USD 0.10 / 0.50 and 
 
 ## Collecting pilot results (for ILAP)
 
-Each phone can make its own report: **Settings → Help the project → ILAP impact report** (CSV or a one-page PDF). To combine all pilot phones (only those that turned on "Share anonymous counts", plus all feedback), run this on your own computer with the service-account key (never in GitHub Actions, whose files are public on a public repo):
+Each phone can make its own report: **Settings → Help the project → Impact report** (CSV or a one-page PDF). To combine all pilot phones (only those that turned on "Share anonymous counts", plus all feedback), run this on your own computer with the service-account key (never in GitHub Actions, whose files are public on a public repo):
 
 ```bash
 cd firebase/functions && npm ci && node scripts/impact-aggregate.mjs --key path/to/service-account.json --out ../../impact-results

@@ -1,13 +1,17 @@
 package com.easylife.app.feature.today
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -17,8 +21,11 @@ import androidx.compose.material.icons.rounded.CameraAlt
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.FactCheck
+import androidx.compose.material.icons.rounded.NightsStay
 import androidx.compose.material.icons.rounded.RateReview
 import androidx.compose.material.icons.rounded.Science
+import androidx.compose.material.icons.rounded.WbSunny
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -26,6 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -73,13 +83,13 @@ fun TodayScreen(nav: NavHostController, onScan: () -> Unit, vm: TodayViewModel =
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            val greeting = when (LocalTime.now().hour) {
+            val hour = LocalTime.now().hour
+            val greeting = when (hour) {
                 in 4..11 -> SToday.greetingMorning
                 in 12..16 -> SToday.greetingDay
                 else -> SToday.greetingEvening
             }
-            Text(greeting.t(), style = MaterialTheme.typography.headlineMedium)
-            Text(Fmt.dayWithWeekday(LocalDate.now(), lang), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            TodayHeader(greeting.t(), Fmt.dayWithWeekday(LocalDate.now(), lang), if (hour in 6..17) Icons.Rounded.WbSunny else Icons.Rounded.NightsStay)
         }
         if (s.prefs.demoMode) {
             item {
@@ -215,6 +225,27 @@ private fun SimpleCard(icon: @Composable () -> Unit, title: String, body: String
         }
         if (action != null) {
             TextButton(onClick = onAction, modifier = Modifier.align(Alignment.End)) { Text(action) }
+        }
+    }
+}
+
+/** Greeting card in the chosen colour scheme (Settings → Appearance → Colour). */
+@Composable
+private fun TodayHeader(greeting: String, date: String, icon: ImageVector) {
+    val c = MaterialTheme.colorScheme
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(Brush.linearGradient(listOf(c.primaryContainer, c.tertiaryContainer)))
+            .padding(horizontal = 20.dp, vertical = 22.dp),
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(greeting, style = MaterialTheme.typography.headlineMedium, color = c.onPrimaryContainer)
+                Text(date, style = MaterialTheme.typography.bodyMedium, color = c.onPrimaryContainer.copy(alpha = 0.8f))
+            }
+            Icon(icon, contentDescription = null, tint = c.onPrimaryContainer.copy(alpha = 0.85f), modifier = Modifier.size(44.dp))
         }
     }
 }

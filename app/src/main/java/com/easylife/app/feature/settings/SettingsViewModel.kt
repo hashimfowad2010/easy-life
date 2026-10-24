@@ -13,6 +13,8 @@ import com.easylife.app.core.data.prefs.PrefsRepository
 import com.easylife.app.core.data.prefs.UserPrefs
 import com.easylife.app.core.data.repo.DemoDataSeeder
 import com.easylife.app.core.designsystem.Module
+import com.easylife.app.core.designsystem.ColorPalette
+import com.easylife.app.core.designsystem.TextSize
 import com.easylife.app.core.designsystem.ThemeMode
 import com.easylife.app.core.designsystem.UrduFont
 import com.easylife.app.core.i18n.AppLanguage
@@ -69,6 +71,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setFont(f: UrduFont) = viewModelScope.launch { prefs.setUrduFont(f) }
     fun setTheme(m: ThemeMode) = viewModelScope.launch { prefs.setThemeMode(m) }
+    fun setPalette(p: ColorPalette) = viewModelScope.launch { prefs.setPalette(p) }
+    fun setTextSize(s: TextSize) = viewModelScope.launch { prefs.setTextSize(s) }
     fun toggleModule(m: Module, on: Boolean) = viewModelScope.launch {
         val cur = prefs.current().enabledModules
         prefs.setEnabledModules(if (on) cur + m else cur - m)
