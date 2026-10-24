@@ -32,7 +32,7 @@ Everything starts with **Universal Scan** (one camera button) and a shared **Lim
 2. When Android asks, allow your browser (or Files app) to **install unknown apps**.
 3. Tap **Install**. Updates install over the old version and keep your data (every release is signed with the same key).
 
-Android 8.0 or newer. About 40 MB. The Urdu translation model (about 30 MB) is downloaded once, on Wi-Fi, when you first need it.
+Android 8.0 or newer. The download is about 30 MB (about 60 MB once installed). The Urdu translation model (about 30 MB) is downloaded once, on Wi-Fi, when you first need it.
 
 ## Privacy, in plain words
 
