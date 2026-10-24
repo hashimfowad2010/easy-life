@@ -81,7 +81,8 @@ class SmartAiViewModel @Inject constructor(
 
     fun consentGemini(given: Boolean) = viewModelScope.launch {
         prefs.setGeminiConsent(given)
-        if (given) prefs.setSmartAiEnabled(true)
+        // Withdrawing switches Smart AI off unless another provider still has consent.
+        if (given) prefs.setSmartAiEnabled(true) else if (prefs.current().claudeConsentAt == null) prefs.setSmartAiEnabled(false)
     }
 
     fun consentClaude(given: Boolean) = viewModelScope.launch {

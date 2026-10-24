@@ -4,7 +4,9 @@
 
 Updated: 24 Oct 2026. Every item marked done is in `main`, builds in CI and passes its unit tests. The emulator smoke test walks the main screens in English and Urdu on every push.
 
-**Firebase status:** not connected yet (no `GOOGLE_SERVICES_JSON` secret), so CI builds with online features **off**. The app says so in Settings. Everything that needs Firebase (Remote Config updates, anonymous price sharing, impact upload, feedback upload, Crashlytics) is built and switches on automatically once the secret is added.
+**Firebase status:** not connected yet (no `GOOGLE_SERVICES_JSON` secret), so CI builds with online features **off**. The app says so in Settings. Everything that needs Firebase (Smart AI with Gemini, Remote Config updates, anonymous price sharing, impact upload, feedback upload, Crashlytics) is built and switches on automatically once the secret is added and AI Logic is enabled in the console.
+
+**Smart AI = Google Gemini, free tier** (Firebase AI Logic on the Spark plan, so nothing can be billed). Users opt in (adults, 18+); photos and explanations go to Gemini, quick tasks stay on the phone, bank SMS and budget data never leave it; numbers, names and addresses are hidden first; 15 Smart AI reads per phone per day. The Claude Cloud Functions remain only as an optional paid path.
 
 ## Phase 0: Foundation ✅
 Done:
@@ -18,7 +20,7 @@ Done:
 - Developer tools (tap version 7 times): Parser Lab, SMS Lab, error report, AI router view.
 
 ## Phase 1: Bills + Bijli Guard ✅
-Done: on-device bill parser (fuzzy labels, OCR digit fixes, history table), confirm screen with highlighted uncertain fields, reminders (quiet hours), bill list and detail, "pay by … to save Rs …"; Shared Limit Engine, tariff calculator (both billing modes, 200/201 boundary, 6-month protected lookback, calibration), meter photo reading (CameraX) with candidates, dashboard, projections, reading-date slip warning, history, appliance advisor, custom limits, Today cards; Gemini provider behind `gemini_enabled` (off).
+Done: on-device bill parser (fuzzy labels, OCR digit fixes, history table), confirm screen with highlighted uncertain fields, reminders (quiet hours), bill list and detail, "pay by … to save Rs …"; Shared Limit Engine, tariff calculator (both billing modes, 200/201 boundary, 6-month protected lookback, calibration), meter photo reading (CameraX) with candidates, dashboard, projections, reading-date slip warning, history, appliance advisor, custom limits, Today cards; Gemini provider (Smart AI, free tier, opt-in).
 
 ## Phase 2: Urdu Helper ✅
 Done: ML Kit translation with model download (Wi-Fi by default), Scan & Read, type/paste, Speak (speech to text), read aloud with Urdu-voice guide and fallback, saved documents with dates, amounts and to-dos, reminders from documents, share target from WhatsApp/Chrome, medical/legal banner.
@@ -35,8 +37,8 @@ Done:
 - **ILAP impact report** (Settings → Help the project): highlights, activity per module, results per AI source; **CSV** and **one-page PDF** export.
 - **Feedback** after 3 days of use (Today card, or Settings): 3 questions in Urdu/English, sent anonymously, kept and retried when offline.
 - Demo mode (fictional family: bill history crossing 200 in July, readings, transactions with an exclusion, saved shopping list, translated circular).
-- **Cloud Functions** `ai` and `shopSearch` (TypeScript, Claude Haiku 5.5 / Sonnet 5.5, structured JSON output, server-side masking, per-user and daily limits, monthly USD budget, web search limited to the retailer allowlist, shared 24 h price cache). 25 tests with a fake Anthropic client run in CI. **Not deployed.**
-- "Check prices online (Smart AI)" in Smart Shopping, shown only when Claude is switched on: results labelled Smart AI (Claude), dated, linked to the shop's page, used only after "Use this price".
+- **Optional paid path (not needed):** Cloud Functions `ai` and `shopSearch` (TypeScript, Claude Haiku 5.5 / Sonnet 5.5, structured JSON output, server-side masking, per-user and daily limits, monthly USD budget, web search limited to the retailer allowlist, shared 24 h price cache). 25 tests with a fake Anthropic client run in CI. **Not deployed.**
+- "Check prices online" in Smart Shopping, shown only if the paid Claude path is ever switched on: results labelled Smart AI (Claude), dated, linked to the shop's page, used only after "Use this price".
 - Room schema committed; CI fails on any schema change without a version bump and migration.
 - Bottom bar at 200 % font: labels capped at 1.3x so icons are never cut off; smoke test now also walks Today, Bijli Guard and Settings at 2x font in Urdu.
 - Firestore security rules tested on the emulator in CI (signed-out users blocked, create-only collections, no financial data, server-only collections closed).

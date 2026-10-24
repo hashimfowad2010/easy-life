@@ -17,8 +17,8 @@ object SPrivacy {
             "OTP، پن یا پاس ورڈ والے پیغامات پہچان کر فوراً ضائع کر دیے جاتے ہیں۔ یہ نہ محفوظ ہوتے ہیں نہ کہیں بھیجے جاتے ہیں۔",
         ),
         Txt("Photos are read on the phone", "تصاویر فون پر ہی پڑھی جاتی ہیں") to Txt(
-            "Bill, meter and receipt photos are read on your phone and deleted after you save the result.",
-            "بل، میٹر اور رسید کی تصاویر فون پر پڑھی جاتی ہیں اور نتیجہ محفوظ ہونے کے بعد مٹا دی جاتی ہیں۔",
+            "Bill, meter and receipt photos are read on your phone (or, only if you turned Smart AI on, sent to Gemini with numbers, names and addresses blacked out) and deleted after you save the result.",
+            "بل، میٹر اور رسید کی تصاویر فون پر پڑھی جاتی ہیں (یا، صرف اگر آپ نے سمارٹ AI آن کیا ہو، نمبر، نام اور پتے کالے کر کے جیمنائی کو بھیجی جاتی ہیں) اور نتیجہ محفوظ ہونے کے بعد مٹا دی جاتی ہیں۔",
         ),
         Txt("Smart AI only if you agree", "سمارٹ AI صرف آپ کی اجازت سے") to Txt(
             "Online Smart AI (Google Gemini, free) is off until you turn it on. Before it is used, Easy Life explains what is sent and asks you. Account, card, CNIC and phone numbers, names and addresses are hidden on the phone first. Google may use and review what is sent on its free tier. Bank SMS and budget data are never sent.",

@@ -51,7 +51,7 @@ Tick each item in **both English and Urdu**, and in **light and dark** mode (Set
 ## Settings, privacy, data
 - [ ] Language switch in Settings flips text and direction.
 - [ ] Urdu font Nastaliq ↔ Naskh.
-- [ ] Smart AI page explains honestly that it's not switched on yet; switch is disabled.
+- [ ] Smart AI page explains Gemini's free-tier data use honestly; the switch stays off until "I am 18 or older. Turn on" is tapped (and that button is disabled in a build without Firebase).
 - [ ] Export all my data → choose a file → a JSON file is written.
 - [ ] Delete all my data → confirm → app restarts at onboarding with nothing left.
 - [ ] Demo mode on/off adds/removes only demo rows (real bills stay).
@@ -94,6 +94,12 @@ Tick each item in **both English and Urdu**, and in **light and dark** mode (Set
 - [ ] Three days after install a "How is Easy Life helping?" card appears on Today; "Later" hides it for 3 days.
 - [ ] With "Share anonymous counts" off, nothing is uploaded (check Firestore stays empty).
 
-## Smart AI switches
-- [ ] Settings → Smart AI: off by default; turning it on explains what is sent (masked text / photos with numbers blacked out) and that bank SMS never go to the free tier.
+## Smart AI (Google Gemini, free)
+- [ ] Settings → Smart AI: off by default; the page says what is sent (numbers, names and addresses hidden), that Google may use and review free-tier data, and that it is for adults; "I am 18 or older. Turn on" switches it on.
+- [ ] With Smart AI on and internet: scan a real bill → the confirm screen shows "Smart AI (Gemini)"; the counter "Today on this phone: N of 15" goes up.
+- [ ] Urdu Helper → "Simple words" mode now works (it said "Needs Smart AI" before turning it on).
+- [ ] Airplane mode: the same scan still works and shows "Read on your phone".
+- [ ] Bank SMS are never sent: Developer tools → AI router lists only the on-device reader for sms_parse (and the router refuses Gemini for it even if Remote Config added it).
+- [ ] After 15 Smart AI reads in a day, scans fall back to "Read on your phone" (AI router shows the daily limit).
+- [ ] Withdraw consent → Smart AI switch turns off and scans read on the phone again.
 - [ ] Developer tools → AI router: each provider shows why it is or isn't used (e.g. "claude_enabled = false").
